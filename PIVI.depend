@@ -7,5 +7,27 @@
 	<SDL2/SDL.h>
 	<stdio.h>
 
-1442530167 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\main.c
+1442534050 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+
+1442533708 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+
+1442531977 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.h
+
+1442533388 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\game.h
+	<SDL2/SDL.h>
+
+1442534029 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\menu.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
 

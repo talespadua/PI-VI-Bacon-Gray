@@ -5,9 +5,9 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "game.h"
 
-
-void mainloop(){
+int mainloop(){
 
     int jogo_ativo = 1;
     int contagem = 0;
@@ -21,30 +21,8 @@ void mainloop(){
     SDL_Event eventos;
     int velocidade_grav = 0;
 
-
-    //window que serah usada para renderizar
-    SDL_Window* window = NULL;
-
-    //Surface contida no na janela (window)
-    SDL_Surface* screenSurface = NULL, *imagem, *sprite;
-
-    //- Inicializa a SDL
-    if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-    {
-        printf("Nao foi possivel inicializar a SDL!  SDL_Error: %s\n", SDL_GetError() );
-        return 1;
-    }
-
-    //Create window
-    window = SDL_CreateWindow( "Ola Mundo - Minha primeira janela", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN );
-    if( window == NULL )
-    {
-        printf("Janela nao pode ser criada!  SDL_Error: %s\n", SDL_GetError() );
-        SDL_Quit();
-        return 2;
-    }
-
-    screenSurface = SDL_GetWindowSurface( window );
+    //Imagens do MainLoop
+    SDL_Surface *imagem, *sprite;
 
     imagem = SDL_LoadBMP("desenho.bmp");
 
@@ -155,19 +133,11 @@ void mainloop(){
             r.x = 800 - r.w;
 
         //printf("\n");
-        SDL_FillRect(screenSurface, NULL, 0xffffff);
-        SDL_BlitSurface(imagem, &rcSprite, screenSurface,&r);
+        SDL_FillRect(game.screenSurface, NULL, 0xffffff);
+        SDL_BlitSurface(imagem, &rcSprite, game.screenSurface,&r);
         //SDL_FillRect(screenSurface, &r, 0xFF0000);
-        SDL_UpdateWindowSurface(window);
+        SDL_UpdateWindowSurface(game.window);
         SDL_Delay(50);
     }
-    //Destroi window
-    SDL_DestroyWindow( window );
-
-    // desliga todos os subsistemas da SDL e libera recursos alocados a eles.
-    // Esta função sempre deve ser chamada antes de você sair.
-    SDL_Quit();
-
-
     return 0;
 }
