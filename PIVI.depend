@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1438978528 source:c:\codeblocks\mingw\olamundo.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+
+1440720559 source:c:\users\tales.cpadua\documents\pivi\pivi\olamundo.cpp
+	<SDL2/SDL.h>
+	<stdio.h>
+
