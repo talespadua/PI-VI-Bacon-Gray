@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include "mainloop.h"
 #include "game.h"
+#include "menu.h"
 
 int init_sdl()
 {    //- Inicializa a SDL
@@ -27,6 +28,5 @@ int main(int argc, char *argv[])
 {
     init_sdl();
     menu();
-    mainloop();
     return 0;
 }

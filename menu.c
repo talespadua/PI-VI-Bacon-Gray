@@ -1,4 +1,6 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include "game.h"
@@ -8,6 +10,8 @@ void menu()
     bool menu_ativo = true;
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
+
+    //TTF_Font *gFont = NULL;
 
     SDL_Rect r = {10,10,32,32};
     SDL_Rect rcSprite = {0,0, 64,205};
@@ -55,7 +59,7 @@ void menu()
         }
 
         if(teclas[UP]){
-            r.y -= 1;
+            mainloop();
         }
         if(teclas[DOWN]){
             r.y+=1;
