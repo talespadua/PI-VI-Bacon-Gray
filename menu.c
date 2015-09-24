@@ -18,9 +18,9 @@ void menu()
     SDL_Event eventos;
 
     //Imagens do Menu
-    SDL_Surface *imagem, *sprite;
+    SDL_Surface *iniciar, *sair;
 
-    imagem = SDL_LoadBMP("desenho.bmp");
+    imagem = SDL_LoadBMP("iniciar.bmp");
 
     if( imagem == NULL )
     {
