@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "game.h"
+#include "mainloop.h"
 
 void menu()
 {
@@ -23,8 +24,8 @@ void menu()
     SDL_Event eventos;
     screenRenderer = SDL_CreateRenderer( game.window, -1, SDL_RENDERER_ACCELERATED );
     //Imagens do Menu
-    SDL_Surface *iniciar, *sair, *name;
-    SDL_Texture *iniciar_textura, *sair_textura, *name_textura;
+    SDL_Surface *iniciar, *sair, *name, *sasha_bacon;
+    SDL_Texture *iniciar_textura, *sair_textura, *name_textura, *sasha_textura;
 
 
     iniciar = SDL_LoadBMP("iniciar.bmp");
@@ -39,14 +40,10 @@ void menu()
     name_textura = SDL_CreateTextureFromSurface( screenRenderer, name );
     SDL_FreeSurface(name);
 
-
-
-    if( name == NULL )
-    {
-        printf("Imagem nao pode ser carregada!  SDL_Error: %s\n", SDL_GetError() );
-        SDL_Quit();
-        return 2;
-    }
+    sasha_bacon = SDL_LoadBMP("sasha_bacon.bmp");
+    SDL_SetColorKey(sasha_bacon, SDL_TRUE, SDL_MapRGB(sasha_bacon->format, 255, 255, 255));
+    sasha_textura = SDL_CreateTextureFromSurface( screenRenderer, sasha_bacon );
+    SDL_FreeSurface(sasha_bacon);
 
     //SDL_SetColorKey(imagem, SDL_TRUE, SDL_MapRGB(imagem->format, 0, 255, 255));
     /*FIM DA INICIALIZACAO*/
@@ -93,16 +90,18 @@ void menu()
         }
         if(entra){
             if(select.y == ini_ret.y){
-                mainloop();
+                jogo();
             }
             if(select.y == sair_ret.y){
                 exit(0);
             }
         }
+        entra = false;
         SDL_SetRenderDrawColor( screenRenderer, 0xFF, 0xFF, 0xFF, 0xFF );
         SDL_RenderClear(screenRenderer);
 
         //SDL_FillRect(screenSurface, &r, 0xFF0000);
+        SDL_RenderCopy(screenRenderer, sasha_textura, NULL, NULL/*&rectDestino*/);
         SDL_RenderCopy(screenRenderer, iniciar_textura, NULL, &ini_ret/*&rectDestino*/);
         SDL_RenderCopy(screenRenderer, sair_textura, NULL, &sair_ret/*&rectDestino*/);
         SDL_RenderCopy(screenRenderer, name_textura, NULL, &name_ret/*&rectDestino*/);

@@ -1,6 +1,6 @@
 #ifndef COMUM_H
 #define COMUM_H
 
-void mainloop();
+void jogo();
 
 #endif

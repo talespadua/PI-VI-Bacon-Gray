@@ -1,10 +1,11 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include "game.h"
 
 #define TAMANHO_MAPA 11
 
-void carrega_mapa(int mapa[][11], SDL_Window* window, SDL_Surface *screenSurface, SDL_Surface *parede,
+void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *screenSurface, SDL_Surface *parede,
                                      SDL_Surface *personagem, SDL_Surface *chao, int tamanho, int *x_jogador, int *y_jogador)
 {
     SDL_Rect r = {0,0,tamanho,tamanho};
@@ -64,18 +65,18 @@ int jogo(int argc, char *argv[]){
 
     SDL_Event eventos;
 
-    SDL_Window* window = NULL;
-    SDL_Surface* screenSurface = NULL, *parede, *personagem, *chao;
+    //SDL_Window* window = NULL;
+    SDL_Surface *parede, *personagem, *chao;
 
     SDL_Init(SDL_INIT_VIDEO);
-    window = SDL_CreateWindow("Testando mapa", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+    //window = SDL_CreateWindow("Testando mapa", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
 
-    screenSurface = SDL_GetWindowSurface(window);
+    //screenSurface = SDL_GetWindowSurface(game.window);
     parede = SDL_LoadBMP("parede.bmp");
     personagem = SDL_LoadBMP("personagem.bmp");
     chao = SDL_LoadBMP("chao.bmp");
 
-    carrega_mapa(mapa, window, screenSurface, parede, personagem, chao, tamanho, &x_jogador, &y_jogador);
+    carrega_mapa(mapa, game.window, game.screenSurface, parede, personagem, chao, tamanho, &x_jogador, &y_jogador);
 
     while(jogo_ativo)
     {
@@ -130,7 +131,7 @@ int jogo(int argc, char *argv[]){
         {
             if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2)
             {
-                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
                 r.y = r.y + tamanho;
                 y_jogador = y_jogador + 1;
                 movimento = true;
@@ -140,7 +141,7 @@ int jogo(int argc, char *argv[]){
         {
             if(mapa[y_jogador - 1][x_jogador] != -1 && y_jogador > 0)
             {
-                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
                 r.y = r.y - tamanho;
                 y_jogador = y_jogador - 1;
                 movimento = true;
@@ -150,7 +151,7 @@ int jogo(int argc, char *argv[]){
         {
             if(mapa[y_jogador][x_jogador + 1] != -1 && x_jogador <= TAMANHO_MAPA - 2)
             {
-                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
                 r.x = r.x + tamanho;
                 x_jogador = x_jogador + 1;
                 movimento = true;
@@ -160,7 +161,7 @@ int jogo(int argc, char *argv[]){
         {
             if(mapa[y_jogador][x_jogador - 1] != -1 && x_jogador > 0)
             {
-                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
                 r.x = r.x - tamanho;
                 x_jogador = x_jogador - 1;
                 movimento = true;
@@ -186,13 +187,13 @@ int jogo(int argc, char *argv[]){
             printf("esquerda: %i\n", mapa[y_jogador - 1][x_jogador]);
             */
 
-            SDL_BlitSurface(personagem, &rcSprite, screenSurface, &r);
+            SDL_BlitSurface(personagem, &rcSprite, game.screenSurface, &r);
         }
-        SDL_UpdateWindowSurface(window);
+        SDL_UpdateWindowSurface(game.window);
     }
 
-    SDL_DestroyWindow( window );
-    SDL_Quit();
+    //SDL_DestroyWindow( game.window );
+    //SDL_Quit();
 
     return 0;
 }

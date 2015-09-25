@@ -15,24 +15,25 @@
 	"game.h"
 	"menu.h"
 
-1443136383 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.c
+1443142214 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.c
 	<SDL2/SDL.h>
-	<stdio.h>
 	<stdbool.h>
+	<stdio.h>
 	"game.h"
 
-1442531977 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.h
+1443141713 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.h
 
 1442533388 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\game.h
 	<SDL2/SDL.h>
 
-1443141447 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\menu.c
+1443142725 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\menu.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
 	<stdio.h>
 	<stdbool.h>
 	"game.h"
+	"mainloop.h"
 
 1442534548 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\menu.h
 
