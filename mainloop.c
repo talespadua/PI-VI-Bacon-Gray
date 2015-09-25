@@ -1,87 +1,122 @@
-/**
-  Autor: Fabio Lubacheski
-  Objetivo: Desenha uma janela utilizando a biblioteca SDL 2.0
-*/
 #include <SDL2/SDL.h>
-#include <stdio.h>
 #include <stdbool.h>
-#include "game.h"
+#include <stdio.h>
 
-int mainloop(){
+#define TAMANHO_MAPA 11
 
+void carrega_mapa(int mapa[][11], SDL_Window* window, SDL_Surface *screenSurface, SDL_Surface *parede,
+                                     SDL_Surface *personagem, SDL_Surface *chao, int tamanho, int *x_jogador, int *y_jogador)
+{
+    SDL_Rect r = {0,0,tamanho,tamanho};
+    SDL_Rect rcSprite = {0,0,tamanho,tamanho};
+
+    SDL_FillRect(screenSurface, NULL, 0xffffff);
+
+    int i, j;
+    for(i = 0; i < TAMANHO_MAPA; i++)
+    {
+        for(j = 0; j < TAMANHO_MAPA; j++)
+        {
+            rcSprite.y = i*tamanho;
+            rcSprite.x = j*tamanho;
+
+            if(mapa[i][j] == -1)
+                SDL_BlitSurface(parede, &r, screenSurface, &rcSprite);
+            else if(mapa[i][j] == 1)
+            {
+                (*y_jogador) = i;
+                (*x_jogador) = j;
+                SDL_BlitSurface(personagem, &r, screenSurface, &rcSprite);
+            }
+            else
+                SDL_BlitSurface(chao, &r, screenSurface, &rcSprite);
+
+        }
+    }
+
+    SDL_UpdateWindowSurface(window);
+}
+
+int jogo(int argc, char *argv[]){
     int jogo_ativo = 1;
-    int contagem = 0;
-    bool pulo = false;
     typedef enum{UP, DOWN, LEFT, RIGHT};
-    int impulso = 60;
     bool teclas[] = {false, false, false, false};
 
-    SDL_Rect r = {10,10,32,32};
-    SDL_Rect rcSprite = {0,0, 64,205};
+    int x_jogador, y_jogador;
+
+    int tamanho = 30;
+    bool movimento = false;
+
+    SDL_Rect r = {0,0,tamanho,tamanho};
+    SDL_Rect rcSprite = {0,0,tamanho,tamanho};
+
+    int mapa[TAMANHO_MAPA][TAMANHO_MAPA] = {{0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+
     SDL_Event eventos;
-    int velocidade_grav = 0;
 
-    //Imagens do MainLoop
-    SDL_Surface *imagem, *sprite;
+    SDL_Window* window = NULL;
+    SDL_Surface* screenSurface = NULL, *parede, *personagem, *chao;
 
-    imagem = SDL_LoadBMP("desenho.bmp");
+    SDL_Init(SDL_INIT_VIDEO);
+    window = SDL_CreateWindow("Testando mapa", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
 
-    if( imagem == NULL )
-    {
-        printf("Imagem nao pode ser carregada!  SDL_Error: %s\n", SDL_GetError() );
-        SDL_Quit();
-        return 2;
-    }
-    SDL_SetColorKey(imagem, SDL_TRUE, SDL_MapRGB(imagem->format, 0, 255, 255));
-    /*FIM DA INICIALIZACAO*/
+    screenSurface = SDL_GetWindowSurface(window);
+    parede = SDL_LoadBMP("parede.bmp");
+    personagem = SDL_LoadBMP("personagem.bmp");
+    chao = SDL_LoadBMP("chao.bmp");
+
+    carrega_mapa(mapa, window, screenSurface, parede, personagem, chao, tamanho, &x_jogador, &y_jogador);
 
     while(jogo_ativo)
     {
-        pulo = false;
         while(SDL_PollEvent(&eventos))
         {
             if(eventos.type == SDL_KEYDOWN)
             {
                 if(eventos.key.keysym.sym == SDLK_DOWN){
-                    printf("[ %5d ] DOWN \n", contagem++);
+                    //printf("DOWN true\n");
                     teclas[DOWN] = true;
                 }
-                if(eventos.key.keysym.sym == SDLK_SPACE){
-                    printf("[ %5d ] DOWN \n", contagem++);
-                    pulo = true;
-                }
                 if(eventos.key.keysym.sym == SDLK_UP){
-                    printf("[ %5d ] UP \n", contagem++);
+                    //printf("UP true\n");
                     teclas[UP] = true;
                 }
                 if(eventos.key.keysym.sym == SDLK_LEFT){
-                    printf("[ %5d ] LEFT\n", contagem++);
+                    //printf("LEFT true\n");
                     teclas[LEFT] = true;
                 }
                 if(eventos.key.keysym.sym == SDLK_RIGHT){
-                    printf("[ %5d ] RIGHT  \n", contagem++);
+                    //printf("RIGHT true\n");
                     teclas[RIGHT] = true;
-                }
-                else{
-                    printf("Qualquer outra coisa \n",contagem++);
                 }
             }
             if(eventos.type == SDL_KEYUP)
             {
                 if(eventos.key.keysym.sym == SDLK_DOWN){
+                    //printf("DOWN false\n");
                     teclas[DOWN] = false;
                 }
                 if(eventos.key.keysym.sym == SDLK_UP){
+                    //printf("UP false\n");
                     teclas[UP] = false;
                 }
                 if(eventos.key.keysym.sym == SDLK_LEFT){
+                    //printf("LEFT false\n");
                     teclas[LEFT] = false;
                 }
                 if(eventos.key.keysym.sym == SDLK_RIGHT){
+                    //printf("RIGHT false\n");
                     teclas[RIGHT] = false;
-                }
-                else{
-                    printf("Qualquer outra coisa \n",contagem++);
                 }
             }
             if(eventos.type == SDL_QUIT){
@@ -89,55 +124,75 @@ int mainloop(){
             }
         }
 
-        if(teclas[UP]){
-            r.y -= 1;
+        r.x = x_jogador*tamanho;
+        r.y = y_jogador*tamanho;
+        if(teclas[DOWN])
+        {
+            if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2)
+            {
+                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                r.y = r.y + tamanho;
+                y_jogador = y_jogador + 1;
+                movimento = true;
+            }
         }
-        if(teclas[DOWN]){
-            r.y+=1;
+        else if(teclas[UP])
+        {
+            if(mapa[y_jogador - 1][x_jogador] != -1 && y_jogador > 0)
+            {
+                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                r.y = r.y - tamanho;
+                y_jogador = y_jogador - 1;
+                movimento = true;
+            }
         }
-        if(teclas[LEFT]){
-            r.x-=1;
-            rcSprite.x -=64;
-            if(rcSprite.x <= 0)
-                rcSprite.x = 192;
+        else if(teclas[RIGHT])
+        {
+            if(mapa[y_jogador][x_jogador + 1] != -1 && x_jogador <= TAMANHO_MAPA - 2)
+            {
+                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                r.x = r.x + tamanho;
+                x_jogador = x_jogador + 1;
+                movimento = true;
+            }
         }
-        if(teclas[RIGHT]){
-            r.x+=1;
-            rcSprite.x+=64;
-            if(rcSprite.x >= 256)
-                rcSprite.x = 0;
-        }
-
-        if(pulo == true){
-            r.y -= impulso;
-            velocidade_grav = 0;
-        }
-
-        //GRAVIDADE LOUCA
-        velocidade_grav += 1;
-        r.y += velocidade_grav;
-
-        //TRATAMENTO COLISAO BORDAS
-        if(r.y < 0)
-            r.y = 0;
-
-        if(r.y + r.h > 600){
-            r.y = 600 - r.h;
-            velocidade_grav *= (-0.8);
+        else if(teclas[LEFT])
+        {
+            if(mapa[y_jogador][x_jogador - 1] != -1 && x_jogador > 0)
+            {
+                SDL_BlitSurface(chao, &rcSprite, screenSurface, &r);
+                r.x = r.x - tamanho;
+                x_jogador = x_jogador - 1;
+                movimento = true;
+            }
         }
 
-        if(r.x < 0)
-            r.x = 0;
 
-        if(r.x + r.w > 800)
-            r.x = 800 - r.w;
 
-        //printf("\n");
-        SDL_FillRect(game.screenSurface, NULL, 0xffffff);
-        SDL_BlitSurface(imagem, &rcSprite, game.screenSurface,&r);
-        //SDL_FillRect(screenSurface, &r, 0xFF0000);
-        SDL_UpdateWindowSurface(game.window);
-        SDL_Delay(50);
+        if(movimento)
+        {
+            teclas[LEFT] = false;
+            teclas[RIGHT] = false;
+            teclas[UP] = false;
+            teclas[DOWN] = false;
+            movimento = false;
+
+            /*
+            //POR ALGUM MOTIVO BIZARRO, O MAPA ESTÁ INVERTIDO NO X E Y, MAS COMO ESTÁ AGORA FUNCIONA PERFEITAMENTE... :v
+            printf("x/y: %i/%i\n", x_jogador, y_jogador);
+            printf("acima: %i\n", mapa[y_jogador][x_jogador - 1]);
+            printf("direita: %i\n", mapa[y_jogador + 1][x_jogador]);
+            printf("abaixo: %i\n", mapa[y_jogador][x_jogador + 1]);
+            printf("esquerda: %i\n", mapa[y_jogador - 1][x_jogador]);
+            */
+
+            SDL_BlitSurface(personagem, &rcSprite, screenSurface, &r);
+        }
+        SDL_UpdateWindowSurface(window);
     }
+
+    SDL_DestroyWindow( window );
+    SDL_Quit();
+
     return 0;
 }
