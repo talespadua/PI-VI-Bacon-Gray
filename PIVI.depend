@@ -37,3 +37,75 @@
 
 1442534548 c:\users\tales.cpadua\documents\pi-vi-bacon-gray\menu.h
 
+1443128716 source:c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+	"menu.h"
+
+1443128716 c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\mainloop.h
+
+1443128716 c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\game.h
+	<SDL2/SDL.h>
+
+1443128716 c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\menu.h
+
+1444339437 source:c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\mainloop.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<limits.h>
+	"game.h"
+	"queue.h"
+
+1443128716 source:c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+
+1444338742 c:\codeblocks\dogg-proj\pi-vi-bacon-gray-master\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1443128716 source:c:\vfdsdl\pi-vi-bacon-gray-master\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+	"menu.h"
+
+1443128716 c:\vfdsdl\pi-vi-bacon-gray-master\mainloop.h
+
+1443128716 c:\vfdsdl\pi-vi-bacon-gray-master\game.h
+	<SDL2/SDL.h>
+
+1443128716 c:\vfdsdl\pi-vi-bacon-gray-master\menu.h
+
+1444352494 source:c:\vfdsdl\pi-vi-bacon-gray-master\mainloop.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<limits.h>
+	"game.h"
+	"queue.h"
+
+1444338744 c:\vfdsdl\pi-vi-bacon-gray-master\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1443128716 source:c:\vfdsdl\pi-vi-bacon-gray-master\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+
