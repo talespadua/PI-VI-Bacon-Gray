@@ -18,22 +18,35 @@ void calculate(Queue *a, Queue *b, int mapa[][TAMANHO_MAPA]);
 
 void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *screenSurface, SDL_Surface *parede,
                                      SDL_Surface *personagem, SDL_Surface *chao, int tamanho, int *x_jogador, int *y_jogador) {
+
+    FILE *arquivo;
+    int data;
+    int i, j;
+
+    arquivo = fopen("mapa.txt", "r");
     SDL_Rect r = {0,0,tamanho,tamanho};
     SDL_Rect rcSprite = {0,0,tamanho,tamanho};
-
     SDL_FillRect(screenSurface, NULL, 0xffffff);
 
-    int i, j;
     for(i = 0; i < TAMANHO_MAPA; i++) {
         for(j = 0; j < TAMANHO_MAPA; j++) {
-            rcSprite.y = i*tamanho;
+            fscanf(arquivo, "%d", &data);
+            printf("%d ", data);
+            mapa[i][j] = data;
+        }
+        printf("\n");
+    }
+
+    for(i = 0; i < TAMANHO_MAPA; i++) {
+        for(j = 0; j < TAMANHO_MAPA; j++) {
             rcSprite.x = j*tamanho;
+            rcSprite.y = i*tamanho;
 
             if(mapa[i][j] == -1)
                 SDL_BlitSurface(parede, &r, screenSurface, &rcSprite);
-            else if(mapa[i][j] == PLAYER_WEIGHT) {
-                (*y_jogador) = i;
+            else if(mapa[i][j] == PLAYER_WEIGHT){
                 (*x_jogador) = j;
+                (*y_jogador) = i;
                 SDL_BlitSurface(personagem, &r, screenSurface, &rcSprite);
             } else
                 SDL_BlitSurface(chao, &r, screenSurface, &rcSprite);
@@ -47,6 +60,7 @@ int jogo(int argc, char *argv[]){
     int jogo_ativo = 1;
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
+    int morto = false;
 
     int x_jogador, y_jogador;
     int x_monstro = 14, y_monstro = 19;
@@ -57,28 +71,7 @@ int jogo(int argc, char *argv[]){
     SDL_Rect r = {0,0,tamanho,tamanho};
     SDL_Rect rcSprite = {0,0,tamanho,tamanho};
 
-    int mapa[TAMANHO_MAPA][TAMANHO_MAPA] = {
-        {0, 0, 0, 0, 0, PLAYER_WEIGHT, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0},
-        {0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0},
-        {0, -1, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0},
-        {0, 0, -1, -1, -1, -1, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, 0, 0},
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-        {0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        };
+    int mapa[TAMANHO_MAPA][TAMANHO_MAPA];
 
     SDL_Event eventos;
 
@@ -153,7 +146,7 @@ int jogo(int argc, char *argv[]){
         r.x = x_jogador*tamanho;
         r.y = y_jogador*tamanho;
         if (teclas[DOWN]) {
-            if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2) {
+            if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2 && !morto) {
                 SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
@@ -164,7 +157,7 @@ int jogo(int argc, char *argv[]){
                 movimento = true;
             }
         } else if(teclas[UP]) {
-            if(mapa[y_jogador - 1][x_jogador] != -1 && y_jogador > 0) {
+            if(mapa[y_jogador - 1][x_jogador] != -1 && y_jogador > 0 && !morto) {
                 SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
@@ -175,7 +168,7 @@ int jogo(int argc, char *argv[]){
                 movimento = true;
             }
         } else if(teclas[RIGHT]) {
-            if(mapa[y_jogador][x_jogador + 1] != -1 && x_jogador <= TAMANHO_MAPA - 2) {
+            if(mapa[y_jogador][x_jogador + 1] != -1 && x_jogador <= TAMANHO_MAPA - 2 && !morto) {
                 SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
@@ -186,7 +179,7 @@ int jogo(int argc, char *argv[]){
                 movimento = true;
             }
         } else if(teclas[LEFT]) {
-            if(mapa[y_jogador][x_jogador - 1] != -1 && x_jogador > 0) {
+            if(mapa[y_jogador][x_jogador - 1] != -1 && x_jogador > 0 && !morto) {
                 SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
@@ -200,7 +193,7 @@ int jogo(int argc, char *argv[]){
 
 
 
-        if (movimento) {
+        if (movimento && !morto) {
             teclas[LEFT] = false;
             teclas[RIGHT] = false;
             teclas[UP] = false;
@@ -253,6 +246,9 @@ int jogo(int argc, char *argv[]){
 
             SDL_BlitSurface(monstro, &rcSprite, game.screenSurface, &r);
             printf("\n");
+
+            if(y_monstro == x_jogador && x_monstro == y_jogador)
+                morto = true;
         }
 
         SDL_UpdateWindowSurface(game.window);
