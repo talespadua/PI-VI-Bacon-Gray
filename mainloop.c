@@ -58,6 +58,11 @@ void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *scr
 
 int jogo(int argc, char *argv[]){
     int jogo_ativo = 1;
+
+    int t1,t2, delay;
+    delay = 25; //- 1000/25 = 40 FPS
+    t1 = SDL_GetTicks();
+
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
     int morto = false;
@@ -252,7 +257,14 @@ int jogo(int argc, char *argv[]){
                     morto = true;
             }
         }
+            //- calcula os milissegundos passados
+        t2 = SDL_GetTicks() - t1;
         SDL_UpdateWindowSurface(game.window);
+        if(t2 < delay){
+            //- espera o resto do tempo
+            SDL_Delay(delay - t2);
+        }
+        t1 = SDL_GetTicks();
     }
 
     queue_free(astar);

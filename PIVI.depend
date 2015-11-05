@@ -15,7 +15,7 @@
 	"game.h"
 	"menu.h"
 
-1446760882 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.c
+1446766890 source:c:\users\tales.cpadua\documents\pi-vi-bacon-gray\mainloop.c
 	<SDL2/SDL.h>
 	<stdbool.h>
 	<stdio.h>
