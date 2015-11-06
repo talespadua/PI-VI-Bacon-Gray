@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <winsock.h> //Biblioteca para se programar em sockets
-#define ADDRESS     "127.0.0.1" // coloque aqui o IP do servidor
+#define ADDRESS     "10.135.117.20" // coloque aqui o IP do servidor
 #define PORTA       5193        // coloque aqui o numero da porta do servidor
 #define CONEXOES    5           // numero de conexoes simultaneas
 
