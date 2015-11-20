@@ -115,3 +115,39 @@
 	<stdlib.h>
 	<stdio.h>
 
+1443132316 source:c:\pi_vi\pi-vi-bacon-gray\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+	"menu.h"
+
+1443132316 c:\pi_vi\pi-vi-bacon-gray\mainloop.h
+
+1443132316 c:\pi_vi\pi-vi-bacon-gray\game.h
+	<SDL2/SDL.h>
+
+1443132316 c:\pi_vi\pi-vi-bacon-gray\menu.h
+
+1446767862 source:c:\pi_vi\pi-vi-bacon-gray\mainloop.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<limits.h>
+	"game.h"
+	"queue.h"
+
+1444342344 c:\pi_vi\pi-vi-bacon-gray\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1443132316 source:c:\pi_vi\pi-vi-bacon-gray\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+
