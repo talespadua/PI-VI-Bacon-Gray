@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <winsock.h>
-#define ADDRESS  "10.135.117.24"
+#define ADDRESS  "127.0.0.1"
 #define PORTA    5193
 #define CONEXOES 2
 
@@ -24,17 +24,16 @@ void trataConexao(int *socket_cliente){
 
     int inicio = 0;
     int aux = 0;
+    char c_aux[2];
 
     WaitForSingleObject(semMutex,INFINITE);
     local_contador = contador;
     contador++;
-    printf("\nConectado usuario %d", contador + 1);
+    printf("\nConectado usuario %d", local_contador + 1);
     ReleaseMutex(semMutex);
 
     cs = *socket_cliente; // guarda copia local.
     while(!local_sair){
-        n = recv(cs,buffer,100,0);
-
         if(!inicio){
             WaitForSingleObject(semMutex,INFINITE);
             aux = st_andamento;
@@ -43,9 +42,9 @@ void trataConexao(int *socket_cliente){
             //Se for o primeiro cliente a se conectar
             if(local_contador == 0){
                 //Envia um OK para o cliente
-                printf("\nEnviando OK para o jogador %d", local_contador + 1);
+                printf("\nEnviando OK para o jogador 1");
                 strcpy(buffer,"ok ");
-                send(cs,buffer, strlen(buffer)+1,0);
+                send(cs, buffer, strlen(buffer)+1,0);
 
                 //Muda o status do andamento
                 WaitForSingleObject(semMutex,INFINITE);
@@ -53,33 +52,24 @@ void trataConexao(int *socket_cliente){
                 ReleaseMutex(semMutex);
 
                 //Aguarda o retorno dos dados
-                printf("\nAguardando dados do jogador %d", local_contador + 1);
-                n = recv(cs,buffer,100,0);
+                printf("\nAguardando dados do jogador 1");
+                n = recv(cs, buffer,100,0);
 
                 //Muda o status do andamento e atualiza os dados do primeiro jogador
                 WaitForSingleObject(semMutex,INFINITE);
-                jg_jogador[local_contador] = buffer[0];
-                jg_ajudante[local_contador] = buffer[1];
-
-
-                printf("\nAguardando dados do jogador %d", local_contador + 1);
-
+                jg_jogador[local_contador] = buffer[0] - '0';
+                jg_ajudante[local_contador] = buffer[1] - '0';
                 st_andamento = 2;
+
+                /*printf("\n> jogador 1 escolheu jogador:  %d", jg_jogador[local_contador]);
+                printf("\n> jogador 1 escolheu ajudante: %d", jg_ajudante[local_contador]);*/
                 ReleaseMutex(semMutex);
 
-
-
-
-
-                /*while(aux != 4)
-                {
-                    WaitForSingleObject(semMutex,INFINITE);
-                    aux = st_andamento;
-                    ReleaseMutex(semMutex);
-                }*/
+                printf("\nAguardando jogador 2...");
             }
 
             if(local_contador == 1){
+                printf("\nAguardando jogador 1...");
                 while(aux != 2)
                 {
                     WaitForSingleObject(semMutex,INFINITE);
@@ -92,10 +82,11 @@ void trataConexao(int *socket_cliente){
                 ReleaseMutex(semMutex);
 
                 //Envia um OK para o cliente
-                printf("\nEnviando OK para o jogador %d", local_contador + 1);
-                strcpy(buffer,"ok");
-                strcat(buffer, aux);
-                send(cs,buffer, strlen(buffer)+1,0);
+                printf("\nEnviando OK para o jogador 2");
+                strcpy(buffer, "ok");
+                sprintf(c_aux, "%d", aux);
+                strcat(buffer, c_aux);
+                send(cs, buffer, strlen(buffer)+1,0);
 
                 //Muda o status do andamento
                 WaitForSingleObject(semMutex,INFINITE);
@@ -103,18 +94,29 @@ void trataConexao(int *socket_cliente){
                 ReleaseMutex(semMutex);
 
                 //Aguarda o retorno dos dados
-                printf("\nAguardando dados do jogador %d", local_contador + 1);
-                n = recv(cs,buffer,100,0);
+                printf("\nAguardando dados do jogador 2");
+                n = recv(cs, buffer,100,0);
 
                 //Muda o status do andamento e atualiza os dados do segundo jogador
                 WaitForSingleObject(semMutex,INFINITE);
+                if(buffer[0])
                 jg_jogador[local_contador] = buffer[0];
                 jg_ajudante[local_contador] = buffer[1];
                 jg_mapa = buffer[2];
-                st_andamento = 2;
+                st_andamento = 4;
                 ReleaseMutex(semMutex);
             }
         }
+
+        while(aux != 4)
+        {
+            WaitForSingleObject(semMutex,INFINITE);
+            aux = st_andamento;
+            ReleaseMutex(semMutex);
+        }
+
+        strcpy(buffer,"ini");
+        send(cs, buffer, strlen(buffer)+1,0);
     }
     close(cs);
 }
