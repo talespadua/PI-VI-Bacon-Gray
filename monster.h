@@ -15,7 +15,7 @@ struct Monster {
     int mode; // Modo de perseguição. 0 para seguir o jogador mais próximo ou n para seguir todos menos o jogador com id == n.
     int speed; // Velocidade de movimento em FPS.
     int condition; // Condição do monstro. 0 para normal, outro valor para algum status especial (ex. cegueira, lentidão).
-    
+
     Monster *next; // Próximo monstro da lista.
 };
 
@@ -32,8 +32,8 @@ void monster_add(MonsterList *ml, int x, int y, int mode, int speed, int conditi
 void monster_remove(MonsterList *ml, Monster *m); // Remove um monstro específico da lista.
 Monster* monster_peek(MonsterList *ml); // Retorna o primeiro monstro da lista sem removê-lo.
 int monster_isEmpty(MonsterList *ml); // Verifica se a lista está vazia.
-void monster_print(Monster *ml); // Printa os ids de todos os monstros na lista.
-void monster_printFull(Monster *ml); // Printa todas as informações de todos os monstros na lista.
+void monster_print(MonsterList *ml); // Printa os ids de todos os monstros na lista.
+void monster_printFull(MonsterList *ml); // Printa todas as informações de todos os monstros na lista.
 
 MonsterList* monster_create() {
     MonsterList *ml = (MonsterList*) malloc(sizeof(MonsterList));
@@ -78,10 +78,10 @@ void monster_add(MonsterList *ml, int x, int y, int mode, int speed, int conditi
     ml->size++;
 }
 
-void monster_remove(MonsterList *ml, Monster m) {
+void monster_remove(MonsterList *ml, Monster *m) {
     if (monster_isEmpty(ml)) {
         printf("Lista vazia!\n");
-        return NULL;
+        return;
     }
 
     Monster *temp = ml->first;
@@ -114,7 +114,7 @@ int monster_isEmpty(MonsterList *ml) {
     return (ml->size == 0);
 }
 
-void monster_print(MonsterList *ml) {    
+void monster_print(MonsterList *ml) {
     Monster *temp = ml->first;
 
     while (temp != NULL) {
