@@ -17,7 +17,7 @@ struct Player {
     int condition; // Condição do jogador. 0 para normal, outro valor para algum status especial (ex. cegueira, lentidão). // TODO fazer um enum
     int character; // Personagem escolhido para jogar. // TODO fazer um enum
     int special; // Quantidade de especiais acumulados pelo jogador.
-    char name[NAME_SIZE]; // Nome do jogador (até 10 caracteres). (Opcional, fica como melhoria).
+    char name[PLAYER_NAME_SIZE]; // Nome do jogador (até 10 caracteres). (Opcional, fica como melhoria).
 
     Player *next; // Próximo jogador da lista.
 };
@@ -30,12 +30,12 @@ struct PlayerList {
 
 PlayerList* player_create(); // Cria uma nova lista.
 void player_clear(PlayerList *pl); // Limpa todos os jogadores da lista.
-void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[NAME_SIZE]); // Adiciona um novo jogador na lista.
+void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]); // Adiciona um novo jogador na lista.
+void player_remove(PlayerList *pl, Player *p); // Remove um jogador específico da lista.
 Player* player_peek(PlayerList *pl); // Retorna o primeiro jogador da lista sem removê-lo.
-Player* player_remove(PlayerList *pl, Player *p); // Remove um jogador específico da lista.
 int player_isEmpty(PlayerList *pl); // Verifica se a lista está vazia.
-void player_print(player *pl); // Printa os ids de todos os jogadores na lista.
-void player_printFull(player *pl); // Printa todas as informações de todos os jogadores na lista.
+void player_print(PlayerList *pl); // Printa os ids de todos os jogadores na lista.
+void player_printFull(PlayerList *pl); // Printa todas as informações de todos os jogadores na lista.
 
 PlayerList* player_create() {
     PlayerList *pl = (PlayerList*) malloc(sizeof(PlayerList));
@@ -59,7 +59,7 @@ void player_clear(PlayerList *pl) {
     pl->last = NULL;
 }
 
-void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[NAME_SIZE]) {
+void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]) {
     Player *p = (Player*) malloc(sizeof(Player));
     p->id = id;
     p->x = x;
@@ -71,24 +71,24 @@ void player_add(PlayerList *pl, int id, int x, int y, int condition, int charact
     p->next = NULL;
 
     int i;
-    for (i = 0; i < NAME_SIZE; i++) {
+    for (i = 0; i < PLAYER_NAME_SIZE; i++) {
         p->name[i] = name[i];
     }
 
     if (player_isEmpty(pl)) {
         pl->first = pl->last = p;
     } else {
-        p->last->next = p;
-        p->last = p;
+        pl->last->next = p;
+        pl->last = p;
     }
 
     pl->size++;
 }
 
-Player* player_remove(PlayerList *pl, Player *p) {
+void player_remove(PlayerList *pl, Player *p) {
     if (player_isEmpty(pl)) {
         printf("Lista vazia!\n");
-        return NULL;
+        return;
     }
 
     Player *temp = pl->first;
