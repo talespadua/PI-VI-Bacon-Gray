@@ -8,50 +8,52 @@
 #include "player.h"
 #include "monster.h"
 
-#define TAMANHO_MAPA 20
+#define MAP_SIZE 20
 #define PLAYER_WEIGHT -2
 
-void printMapa(int mapa[][TAMANHO_MAPA]);
-void copyMatrix(int a[][TAMANHO_MAPA], int b[][TAMANHO_MAPA]);
-void enqueueNeighbors(Queue *q, Node *n, int mapa[][TAMANHO_MAPA]);
-void smallestNeighbor(int mapa[][TAMANHO_MAPA], int *x, int *y);
-void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][TAMANHO_MAPA]);
-void calculate(Queue *a, Queue *b, int mapa[][TAMANHO_MAPA]);
+void printMapa(int mapa[][MAP_SIZE]);
+void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]);
+void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]);
+void smallestNeighbor(int mapa[][MAP_SIZE], int *x, int *y);
+void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]);
+void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]);
 
-void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *screenSurface, SDL_Surface *parede,
-                                     SDL_Surface *personagem, SDL_Surface *chao, int tamanho, int *x_jogador, int *y_jogador) {
+void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenSurface,
+                  SDL_Surface *parede, SDL_Surface *personagem, SDL_Surface *chao,
+                  int tamanho, int *x_jogador, int *y_jogador) {
 
-    FILE *arquivo;
-    int data;
+    FILE *mapFile;
+    int square;
     int i, j;
 
-    arquivo = fopen("mapa.txt", "r");
+    mapFile = fopen("mapa.txt", "r");
     SDL_Rect r = {0,0,tamanho,tamanho};
     SDL_Rect rcSprite = {0,0,tamanho,tamanho};
     SDL_FillRect(screenSurface, NULL, 0xffffff);
 
-    for(i = 0; i < TAMANHO_MAPA; i++) {
-        for(j = 0; j < TAMANHO_MAPA; j++) {
-            fscanf(arquivo, "%d", &data);
-            printf("%d ", data);
-            mapa[i][j] = data;
+    for(j = 0; j < MAP_SIZE; j++) {
+        for(i = 0; i < MAP_SIZE; i++) {
+            fscanf(mapFile, "%d", &square);
+            printf("%d ", square);
+            mapa[i][j] = square;
         }
         printf("\n");
     }
 
-    for(i = 0; i < TAMANHO_MAPA; i++) {
-        for(j = 0; j < TAMANHO_MAPA; j++) {
-            rcSprite.x = j*tamanho;
-            rcSprite.y = i*tamanho;
+    for (j = 0; j < MAP_SIZE; j++) {
+        for (i = 0; i < MAP_SIZE; i++) {
+            rcSprite.x = i*tamanho;
+            rcSprite.y = j*tamanho;
 
-            if(mapa[i][j] == -1)
+            if (mapa[i][j] == -1) {
                 SDL_BlitSurface(parede, &r, screenSurface, &rcSprite);
-            else if(mapa[i][j] == PLAYER_WEIGHT){
-                (*x_jogador) = j;
-                (*y_jogador) = i;
+            } else if(mapa[i][j] == PLAYER_WEIGHT){
+                (*x_jogador) = i;
+                (*y_jogador) = j;
                 SDL_BlitSurface(personagem, &r, screenSurface, &rcSprite);
-            } else
+            } else {
                 SDL_BlitSurface(chao, &r, screenSurface, &rcSprite);
+            }
         }
     }
 
@@ -61,21 +63,29 @@ void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *scr
 int jogo(int argc, char *argv[]){
     int jogo_ativo = 1;
 
-    int t1, t2, t3, delay, timeCounter = 0;
-    delay = 25; //- 1000/25 = 40 FPS
+    int t1, t2, t3, delay, timeCounter, framesPassed;
+    timeCounter = 0;
+    delay = 16; //- 1000/16 ~= 60 FPS
     t1 = SDL_GetTicks();
-    int framesPassed = 0;
+    framesPassed = 0;
     bool playerWalk = true;
     bool monsterWalk = false;
 
+    int monsterBaseSpeed = MONSTER_BASE_SPEED;
     MonsterList *ml = monster_create();
+    // monster_add(ml, 14, 19, 0, monsterBaseSpeed, 0);
+
+    PlayerList *pl = player_create();
+    player_add(pl, 1, 0, 0, 0, 0, "lol");
+    Player *p = pl->first;
+    bool special = false;
 
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
     int morto = false;
 
-    int x_jogador, y_jogador;
-    int x_monstro = 14, y_monstro = 19;
+    // int x_jogador, y_jogador;
+    // int x_monstro = 14, y_monstro = 19;
 
     int tamanho = 30;
     bool movimento = false;
@@ -83,7 +93,7 @@ int jogo(int argc, char *argv[]){
     SDL_Rect r = {0,0,tamanho,tamanho};
     SDL_Rect rcSprite = {0,0,tamanho,tamanho};
 
-    int mapa[TAMANHO_MAPA][TAMANHO_MAPA];
+    int mapa[MAP_SIZE][MAP_SIZE];
 
     SDL_Event eventos;
 
@@ -102,32 +112,58 @@ int jogo(int argc, char *argv[]){
     monstro = SDL_LoadBMP("monstro.bmp");
     chao = SDL_LoadBMP("chao.bmp");
 
-    carrega_mapa(mapa, game.window, game.screenSurface, parede, personagem, chao, tamanho, &x_jogador, &y_jogador);
+    carrega_mapa(mapa, game.window, game.screenSurface, parede, personagem, chao, tamanho, &p->x, &p->y);
 
     while (jogo_ativo) {
         while (SDL_PollEvent(&eventos)) {
             if (eventos.type == SDL_KEYDOWN) {
                 if (eventos.key.keysym.sym == SDLK_DOWN) {
                     //printf("DOWN true\n");
+                    // Teste
+                    teclas[LEFT] = false;
+                    teclas[RIGHT] = false;
+                    teclas[UP] = false;
+
                     teclas[DOWN] = true;
                 }
 
                 if (eventos.key.keysym.sym == SDLK_UP) {
                     //printf("UP true\n");
+                    // Teste
+                    teclas[LEFT] = false;
+                    teclas[RIGHT] = false;
+                    teclas[DOWN] = false;
+
                     teclas[UP] = true;
                 }
 
                 if (eventos.key.keysym.sym == SDLK_LEFT) {
                     //printf("LEFT true\n");
+                    // Teste
+                    teclas[RIGHT] = false;
+                    teclas[UP] = false;
+                    teclas[DOWN] = false;
+
                     teclas[LEFT] = true;
                 }
 
                 if (eventos.key.keysym.sym == SDLK_RIGHT) {
                     //printf("RIGHT true\n");
+                    // Teste
+                    teclas[LEFT] = false;
+                    teclas[UP] = false;
+                    teclas[DOWN] = false;
+
                     teclas[RIGHT] = true;
+                }
+
+                if (eventos.key.keysym.sym == SDLK_SPACE) {
+                    //printf("RIGHT true\n");
+                    special = true;
                 }
             }
 
+            /*
             if (eventos.type == SDL_KEYUP) {
                 if(eventos.key.keysym.sym == SDLK_DOWN) {
                     //printf("DOWN false\n");
@@ -148,71 +184,71 @@ int jogo(int argc, char *argv[]){
                     //printf("RIGHT false\n");
                     teclas[RIGHT] = false;
                 }
-            }
+            } //*/
 
             if (eventos.type == SDL_QUIT){
                 jogo_ativo = 0;
             }
         }
 
-        playerWalk = (framesPassed % 200) == 0;
-        r.x = x_jogador*tamanho;
-        r.y = y_jogador*tamanho;
+        playerWalk = (framesPassed % p->speed) == 0;
+        r.x = p->x * tamanho;
+        r.y = p->y * tamanho;
 
         if (!morto && playerWalk) {
             if (teclas[DOWN]) {
-                if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2) {
+                if(mapa[p->x][p->y+1] != -1 && p->y <= MAP_SIZE - 2) {
                     SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
-                    mapa[y_jogador][x_jogador] = 0;
+                    mapa[p->x][p->y] = 0;
 
                     r.y = r.y + tamanho;
-                    y_jogador = y_jogador + 1;
+                    p->y++;
                     movimento = true;
                 }
             } else if(teclas[UP]) {
-                if(mapa[y_jogador - 1][x_jogador] != -1 && y_jogador > 0) {
+                if(mapa[p->x][p->y-1] != -1 && p->y > 0) {
                     SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
-                    mapa[y_jogador][x_jogador] = 0;
+                    mapa[p->x][p->y] = 0;
 
                     r.y = r.y - tamanho;
-                    y_jogador = y_jogador - 1;
+                    p->y--;
                     movimento = true;
                 }
             } else if(teclas[RIGHT]) {
-                if(mapa[y_jogador][x_jogador + 1] != -1 && x_jogador <= TAMANHO_MAPA - 2) {
+                if(mapa[p->x+1][p->y] != -1 && p->x <= MAP_SIZE - 2) {
                     SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
-                    mapa[y_jogador][x_jogador] = 0;
+                    mapa[p->x][p->y] = 0;
 
                     r.x = r.x + tamanho;
-                    x_jogador = x_jogador + 1;
+                    p->x++;
                     movimento = true;
                 }
             } else if(teclas[LEFT]) {
-                if(mapa[y_jogador][x_jogador - 1] != -1 && x_jogador > 0) {
+                if(mapa[p->x-1][p->y] != -1 && p->x > 0) {
                     SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
-                    mapa[y_jogador][x_jogador] = 0;
+                    mapa[p->x][p->y] = 0;
 
                     r.x = r.x - tamanho;
-                    x_jogador = x_jogador - 1;
+                    p->x--;
                     movimento = true;
                 }
             }
 
             // if (movimento) {
-            if (movimento && playerWalk) {
-                teclas[LEFT] = false;
-                teclas[RIGHT] = false;
-                teclas[UP] = false;
-                teclas[DOWN] = false;
-                movimento = false;
+            if (movimento) {
+                //teclas[LEFT] = false;
+                //teclas[RIGHT] = false;
+                //teclas[UP] = false;
+                //teclas[DOWN] = false;
+                //movimento = false;
 
                 /*
                 //POR ALGUM MOTIVO BIZARRO, O MAPA ESTÁ INVERTIDO NO X E Y, MAS COMO ESTÁ AGORA FUNCIONA PERFEITAMENTE... :v
@@ -226,67 +262,78 @@ int jogo(int argc, char *argv[]){
                 SDL_BlitSurface(personagem, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
-                mapa[y_jogador][x_jogador] = -2;
+                mapa[p->x][p->y] = -2;
             }
 
-            // Teste
-            /*
-            if ((timeCounter % 5) == 0) {
-                r.x = y_monstro*tamanho;
-                r.y = x_monstro*tamanho;
-                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
-
-                x_monstro = 14;
-                y_monstro = 19;
-            }//*/
-
-            monsterWalk = (framesPassed % 300) == 0;
-            // movimento do monstro
-            if (monsterWalk) {
-            // if ((t2 % 241) == 0) {
-                // x, y, w
-                monster_print(ml);
+            if (special && !monster_isEmpty(ml)) {
+                special = false;
 
                 Monster *m = ml->first;
-                while (m) {
-                    queue_clear(astar);
-                    queue_clear(way);
-                    queue_enq(astar, m->x, m->y, 0);
-                    queue_enq(astar, y_jogador, x_jogador, 0);
+                monster_remove(ml, m);
 
-                    // printf("astar:\n");
-                    // queue_print(astar);
-                    calculate(astar, way, mapa);
+                mapa[m->x][m->y] = 0;
+                r.x = m->x*tamanho;
+                r.y = m->y*tamanho;
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
-                    // printf("Way:\n");
-                    // queue_print(way);
-
-                    r.x = m->y*tamanho;
-                    r.y = m->x*tamanho;
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
-
-                    if (!queue_isEmpty(way)) {
-                        Node *n = queue_deq(way);
-                        m->x = n->x;
-                        m->y = n->y;
-
-                        // printf("Node: ");
-                        // queue_printNode(n);
-                    }
-
-                    r.x = m->y*tamanho;
-                    r.y = m->x*tamanho;
-
-                    SDL_BlitSurface(monstro, &rcSprite, game.screenSurface, &r);
-                    printf("\n");
-
-                    if (m->y == x_jogador && m->x == y_jogador) {
-                        morto = true;
-                    }
-
-                    m = m->next;
-                }
+                free(m);
             }
+        }
+
+        Monster *m = ml->first;
+        while (m) {
+            monsterWalk = (framesPassed % m->speed) == 0;
+
+            // movimento do monstro
+            if (!monsterWalk) {
+                m = m->next;
+                continue;
+            }
+
+            mapa[m->x][m->y] = 0;
+
+            queue_clear(astar);
+            queue_clear(way);
+            queue_enq(astar, m->x, m->y, 0);
+            queue_enq(astar, p->x, p->y, 0);
+
+            // printf("astar:\n");
+            // queue_print(astar);
+            calculate(astar, way, mapa);
+
+            // printf("Way:\n");
+            // queue_print(way);
+
+            r.x = m->x*tamanho;
+            r.y = m->y*tamanho;
+            SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+
+            if (!queue_isEmpty(way)) {
+                Node *n = queue_deq(way);
+                m->x = n->x;
+                m->y = n->y;
+
+                // printf("Node: ");
+                // queue_printNode(n);
+            }
+
+            r.x = m->x*tamanho;
+            r.y = m->y*tamanho;
+
+            SDL_BlitSurface(monstro, &rcSprite, game.screenSurface, &r);
+            // printf("\n");
+
+            mapa[m->x][m->y] = -1;
+
+            if (m->x == p->x && m->y == p->y) {
+                morto = true;
+            }
+
+            m = m->next;
+        }
+
+        if (morto) {
+            break;
         }
 
         //- calcula os milissegundos passados
@@ -294,7 +341,7 @@ int jogo(int argc, char *argv[]){
         SDL_UpdateWindowSurface(game.window);
 
         //*
-        if(t2 < delay){
+        if (t2 < delay){
             //- espera o resto do tempo
             SDL_Delay(delay - t2);
         } //*/
@@ -306,7 +353,8 @@ int jogo(int argc, char *argv[]){
             t1 = SDL_GetTicks();
 
             if ((timeCounter % 5) == 0) {
-                monster_add(ml, 14, 19, 0, 200, 0);
+                monsterBaseSpeed -= 20;
+                monster_add(ml, 9, 9, 0, monsterBaseSpeed, 0);
             }
 
             timeCounter++;
@@ -317,6 +365,7 @@ int jogo(int argc, char *argv[]){
     queue_free(astar);
     queue_free(way);
     monster_free(ml);
+    player_free(pl);
 
     //SDL_DestroyWindow( game.window );
     //SDL_Quit();
@@ -324,10 +373,10 @@ int jogo(int argc, char *argv[]){
     return 0;
 }
 
-void printMapa(int mapa[][TAMANHO_MAPA]) {
+void printMapa(int mapa[][MAP_SIZE]) {
     int i, j;
-    for (i = 0; i < TAMANHO_MAPA; i++) {
-        for (j = 0; j < TAMANHO_MAPA; j++) {
+    for (i = 0; i < MAP_SIZE; i++) {
+        for (j = 0; j < MAP_SIZE; j++) {
             if (mapa[i][j] < 0 || mapa[i][j] > 9)
                 printf("%d, ", mapa[i][j]);
             else
@@ -339,18 +388,18 @@ void printMapa(int mapa[][TAMANHO_MAPA]) {
     printf("\n");
 }
 
-void copyMatrix(int a[][TAMANHO_MAPA], int b[][TAMANHO_MAPA]) {
+void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]) {
     int i, j;
 
-    for (i = 0; i < TAMANHO_MAPA; i++)
-        for (j = 0; j < TAMANHO_MAPA; j++)
+    for (i = 0; i < MAP_SIZE; i++)
+        for (j = 0; j < MAP_SIZE; j++)
             b[i][j] = a[i][j];
 }
 
-void enqueueNeighbors(Queue *q, Node *n, int mapa[][TAMANHO_MAPA]) {
+void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]) {
     int x = n->x, y = n->y, w = n->w +1;
     int xn, yn, aux;
-    int border = TAMANHO_MAPA-1;
+    int border = MAP_SIZE-1;
 
     // (x-1, y) == cima
     if (x > 0) {
@@ -401,10 +450,10 @@ void enqueueNeighbors(Queue *q, Node *n, int mapa[][TAMANHO_MAPA]) {
     }
 }
 
-void smallestNeighbor(int mapa[][TAMANHO_MAPA], int *rx, int *ry) {
+void smallestNeighbor(int mapa[][MAP_SIZE], int *rx, int *ry) {
     int a, b, xn, yn, aux, smallest = INT_MAX;
     int x = (*rx), y = (*ry);
-    int border = TAMANHO_MAPA-1;
+    int border = MAP_SIZE-1;
 
     // (x-1, y) == cima
     if (x > 0) {
@@ -463,7 +512,7 @@ void smallestNeighbor(int mapa[][TAMANHO_MAPA], int *rx, int *ry) {
     (*ry) = b;
 }
 
-void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][TAMANHO_MAPA]) {
+void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]) {
     int xs = s->x, ys = s->y;
     int xt = t->x, yt = t->y;
     int x = xs, y = ys;
@@ -481,11 +530,11 @@ void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][TAMANHO_MAPA]) {
     }
 }
 
-void calculate(Queue *a, Queue *b, int mapa[][TAMANHO_MAPA]) {
+void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]) {
     Node *monster = queue_deq(a);
     Node *player = queue_peek(a);
 
-    int mapaAux[TAMANHO_MAPA][TAMANHO_MAPA];
+    int mapaAux[MAP_SIZE][MAP_SIZE];
     copyMatrix(mapa, mapaAux);
 
     // printMapa(mapaAux);
