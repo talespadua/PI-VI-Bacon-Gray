@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #define PLAYER_NAME_SIZE 11
-#define PLAYER_BASE_SPEED 12
+#define PLAYER_BASE_SPEED 220
 
 typedef struct Player Player;
 typedef struct PlayerList PlayerList;
@@ -30,6 +30,7 @@ struct PlayerList {
 
 PlayerList* player_create(); // Cria uma nova lista.
 void player_clear(PlayerList *pl); // Limpa todos os jogadores da lista.
+void player_free(PlayerList *pl); // Libera os recursos da lista.
 void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]); // Adiciona um novo jogador na lista.
 void player_remove(PlayerList *pl, Player *p); // Remove um jogador específico da lista.
 Player* player_peek(PlayerList *pl); // Retorna o primeiro jogador da lista sem removê-lo.
@@ -57,6 +58,11 @@ void player_clear(PlayerList *pl) {
 
     pl->size = 0;
     pl->last = NULL;
+}
+
+void player_free(PlayerList *pl) {
+    player_clear(pl);
+    free(pl);
 }
 
 void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]) {
@@ -98,12 +104,17 @@ void player_remove(PlayerList *pl, Player *p) {
             // Estamos removendo do meio da lista, vamos assegurar que ela permanece contínua.
             if (before) {
                 before->next = temp->next;
+            } else {
+                pl->first = temp->next;
             }
+
             pl->size--;
 
             if (player_isEmpty(pl)) {
                 pl->last = pl->first;
             }
+
+            return;
         } else {
             before = temp;
             temp = temp->next;
