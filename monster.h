@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MONSTER_BASE_SPEED 10
+#define MONSTER_BASE_SPEED 500
 
 typedef struct Monster Monster;
 typedef struct MonsterList MonsterList;
@@ -92,17 +92,23 @@ void monster_remove(MonsterList *ml, Monster *m) {
 
     Monster *temp = ml->first;
     Monster *before = NULL;
+
     while (temp) {
         if (temp->id == m->id) {
             // Estamos removendo do meio da lista, vamos assegurar que ela permanece contínua.
             if (before) {
                 before->next = temp->next;
+            } else {
+                ml->first = temp->next;
             }
+
             ml->size--;
 
             if (monster_isEmpty(ml)) {
                 ml->last = ml->first;
             }
+
+            return;
         } else {
             before = temp;
             temp = temp->next;
