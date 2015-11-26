@@ -5,6 +5,8 @@
 
 #include "game.h"
 #include "queue.h"
+#include "player.h"
+#include "monster.h"
 
 #define TAMANHO_MAPA 20
 #define PLAYER_WEIGHT -2
@@ -59,9 +61,14 @@ void carrega_mapa(int mapa[][TAMANHO_MAPA], SDL_Window* window, SDL_Surface *scr
 int jogo(int argc, char *argv[]){
     int jogo_ativo = 1;
 
-    int t1,t2, delay;
+    int t1, t2, t3, delay, timeCounter = 0;
     delay = 25; //- 1000/25 = 40 FPS
     t1 = SDL_GetTicks();
+    int framesPassed = 0;
+    bool playerWalk = true;
+    bool monsterWalk = false;
+
+    MonsterList *ml = monster_create();
 
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
@@ -148,9 +155,11 @@ int jogo(int argc, char *argv[]){
             }
         }
 
+        playerWalk = (framesPassed % 200) == 0;
         r.x = x_jogador*tamanho;
         r.y = y_jogador*tamanho;
-        if(!morto){
+
+        if (!morto && playerWalk) {
             if (teclas[DOWN]) {
                 if(mapa[y_jogador + 1][x_jogador] != -1 && y_jogador <= TAMANHO_MAPA - 2) {
                     SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
@@ -197,9 +206,8 @@ int jogo(int argc, char *argv[]){
                 }
             }
 
-
-
-            if (movimento) {
+            // if (movimento) {
+            if (movimento && playerWalk) {
                 teclas[LEFT] = false;
                 teclas[RIGHT] = false;
                 teclas[UP] = false;
@@ -219,56 +227,96 @@ int jogo(int argc, char *argv[]){
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
                 mapa[y_jogador][x_jogador] = -2;
+            }
 
-                // movimento do monstro
-                // x, y, w
-                queue_clear(astar);
-                queue_clear(way);
-                queue_enq(astar, x_monstro, y_monstro, 0);
-                queue_enq(astar, y_jogador, x_jogador, 0);
-
-                printf("astar:\n");
-                queue_print(astar);
-                calculate(astar, way, mapa);
-
-                printf("Way:\n");
-                queue_print(way);
-
+            // Teste
+            /*
+            if ((timeCounter % 5) == 0) {
                 r.x = y_monstro*tamanho;
                 r.y = x_monstro*tamanho;
                 SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
 
-                if (!queue_isEmpty(way)) {
-                    Node *n = queue_deq(way);
-                    x_monstro = n->x;
-                    y_monstro = n->y;
+                x_monstro = 14;
+                y_monstro = 19;
+            }//*/
 
-                    printf("Node: ");
-                    queue_printNode(n);
+            monsterWalk = (framesPassed % 300) == 0;
+            // movimento do monstro
+            if (monsterWalk) {
+            // if ((t2 % 241) == 0) {
+                // x, y, w
+                monster_print(ml);
+
+                Monster *m = ml->first;
+                while (m) {
+                    queue_clear(astar);
+                    queue_clear(way);
+                    queue_enq(astar, m->x, m->y, 0);
+                    queue_enq(astar, y_jogador, x_jogador, 0);
+
+                    // printf("astar:\n");
+                    // queue_print(astar);
+                    calculate(astar, way, mapa);
+
+                    // printf("Way:\n");
+                    // queue_print(way);
+
+                    r.x = m->y*tamanho;
+                    r.y = m->x*tamanho;
+                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+
+                    if (!queue_isEmpty(way)) {
+                        Node *n = queue_deq(way);
+                        m->x = n->x;
+                        m->y = n->y;
+
+                        // printf("Node: ");
+                        // queue_printNode(n);
+                    }
+
+                    r.x = m->y*tamanho;
+                    r.y = m->x*tamanho;
+
+                    SDL_BlitSurface(monstro, &rcSprite, game.screenSurface, &r);
+                    printf("\n");
+
+                    if (m->y == x_jogador && m->x == y_jogador) {
+                        morto = true;
+                    }
+
+                    m = m->next;
                 }
-
-                r.x = y_monstro*tamanho;
-                r.y = x_monstro*tamanho;
-
-                SDL_BlitSurface(monstro, &rcSprite, game.screenSurface, &r);
-                printf("\n");
-
-                if(y_monstro == x_jogador && x_monstro == y_jogador)
-                    morto = true;
             }
         }
-            //- calcula os milissegundos passados
+
+        //- calcula os milissegundos passados
         t2 = SDL_GetTicks() - t1;
         SDL_UpdateWindowSurface(game.window);
+
+        //*
         if(t2 < delay){
             //- espera o resto do tempo
             SDL_Delay(delay - t2);
+        } //*/
+
+        framesPassed = (framesPassed++) % (1000);
+
+        //*
+        if (t2 > 1000) {
+            t1 = SDL_GetTicks();
+
+            if ((timeCounter % 5) == 0) {
+                monster_add(ml, 14, 19, 0, 200, 0);
+            }
+
+            timeCounter++;
         }
-        t1 = SDL_GetTicks();
+        //*/
     }
 
     queue_free(astar);
     queue_free(way);
+    monster_free(ml);
 
     //SDL_DestroyWindow( game.window );
     //SDL_Quit();
@@ -410,7 +458,7 @@ void smallestNeighbor(int mapa[][TAMANHO_MAPA], int *rx, int *ry) {
         }
     }
 
-    printf("smallest: %d\n", smallest);
+    // printf("smallest: %d\n", smallest);
     (*rx) = a;
     (*ry) = b;
 }
@@ -420,8 +468,8 @@ void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][TAMANHO_MAPA]) {
     int xt = t->x, yt = t->y;
     int x = xs, y = ys;
 
-    printf ("inicial: x:%d, y:%d\n", x, y);
-    printf ("destino: x:%d, y:%d\n", xt, yt);
+    // printf ("inicial: x:%d, y:%d\n", x, y);
+    // printf ("destino: x:%d, y:%d\n", xt, yt);
 
     while ((x != xt) || (y != yt)) {
     // while (1) {
@@ -448,10 +496,10 @@ void calculate(Queue *a, Queue *b, int mapa[][TAMANHO_MAPA]) {
     // printMapa(mapaAux);
 
     // return;
-    printf("player: ");
-    queue_printNode(player);
-    printf("monster: ");
-    queue_printNode(monster);
+    // printf("player: ");
+    // queue_printNode(player);
+    // printf("monster: ");
+    // queue_printNode(monster);
     enqueueBestWay(b, monster, player, mapaAux);
     // queue_print(b);
 }

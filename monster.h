@@ -28,6 +28,7 @@ struct MonsterList {
 
 MonsterList* monster_create(); // Cria uma nova lista.
 void monster_clear(MonsterList *ml); // Limpa todos os monstros da lista.
+void monster_free(MonsterList *ml); // Desaloca todos os recursos para esta lista.
 void monster_add(MonsterList *ml, int x, int y, int mode, int speed, int condition); // Adiciona um novo monstro na lista.
 void monster_remove(MonsterList *ml, Monster *m); // Remove um monstro específico da lista.
 Monster* monster_peek(MonsterList *ml); // Retorna o primeiro monstro da lista sem removê-lo.
@@ -56,6 +57,11 @@ void monster_clear(MonsterList *ml) {
 
     ml->size = 0;
     ml->last = NULL;
+}
+
+void monster_free(MonsterList *ml) {
+    monster_clear(ml);
+    free(ml);
 }
 
 void monster_add(MonsterList *ml, int x, int y, int mode, int speed, int condition) {
