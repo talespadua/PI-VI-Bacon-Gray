@@ -520,14 +520,14 @@ void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]) {
     // printf ("inicial: x:%d, y:%d\n", x, y);
     // printf ("destino: x:%d, y:%d\n", xt, yt);
 
-    while ((x != xt) || (y != yt)) {
+    // while ((x != xt) || (y != yt)) {
     // while (1) {
         smallestNeighbor(mapa, &x, &y);
         queue_enq(q, x, y, 0);
         // printf ("x:%d, y:%d\n", x, y);
 
         // if (x == xt && y == yt) break;
-    }
+    // }
 }
 
 void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]) {
