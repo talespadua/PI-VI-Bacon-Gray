@@ -8,7 +8,7 @@ int num_jogador;
 char address[16];
 
 void inicio(int *socket_cliente){
-    char buffer[512];
+    char buffer[627];
     int aux = 0;
 
     printf("\nAguardando OK do servidor...");
@@ -32,8 +32,11 @@ void inicio(int *socket_cliente){
     printf("\nRecebido: |%s|", buffer);
 
     if(!strcmp(buffer, "ini"))
-    {
         printf("\n\nIniciando jogo...\n\n");
+
+    while(strcmp(buffer, "end")){
+        recv(socket_cliente, buffer, 627, 0);
+        printf("\n\nRecebido:\n%s", buffer);
     }
 }
 
@@ -59,9 +62,7 @@ void config(){
             address[i++] = data;
         }
     }
-
     fclose(arquivo);
-    printf("Endereco: %s\n", address);
 }
 
 int main( void )
