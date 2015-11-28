@@ -13,7 +13,7 @@ int char_select()
     typedef enum{UP, DOWN, LEFT, RIGHT};
     bool teclas[] = {false, false, false, false};
 
-    int pos_x = 10, pos_y = 10;
+    int pos_x = 10, pos_y = 10, hab_num = 0;
 
     SDL_Rect select = {6, 6, 158 , 233};
     SDL_Rect hab = {550, 50, 400, 624};
@@ -40,7 +40,27 @@ int char_select()
     //Imagens do Menu
     SDL_Surface *default_char, *bacon, *hability;
 
-    default_char = SDL_LoadBMP("char.bmp");
+    SDL_Surface *char_img[9];
+    char_img[0] = SDL_LoadBMP("papaleguas.bmp");
+    char_img[1] = SDL_LoadBMP("reagan.bmp");
+    char_img[2] = SDL_LoadBMP("vini.bmp");
+    char_img[3] = SDL_LoadBMP("scorpion.bmp");
+    char_img[4] = SDL_LoadBMP("tati.bmp");
+    char_img[5] = SDL_LoadBMP("wander.bmp");
+    char_img[6] = SDL_LoadBMP("zeca.bmp");
+    char_img[7] = SDL_LoadBMP("frozen.bmp");
+    char_img[8] = SDL_LoadBMP("tales.bmp");
+
+    SDL_Surface *habilidades[9];
+    habilidades[0] = SDL_LoadBMP("papaleguas_hab.bmp");
+    habilidades[1] = SDL_LoadBMP("reagan_hab.bmp");
+    habilidades[2] = SDL_LoadBMP("vini_hab.bmp");
+    habilidades[3] = SDL_LoadBMP("scorpion_hab.bmp");
+    habilidades[4] = SDL_LoadBMP("tati_hab.bmp");
+    habilidades[5] = SDL_LoadBMP("wander_hab.bmp");
+    habilidades[6] = SDL_LoadBMP("zeca_hab.bmp");
+    habilidades[7] = SDL_LoadBMP("elsa_hab.bmp");
+    habilidades[8] = SDL_LoadBMP("tales_hab.bmp");
 
     hability = SDL_LoadBMP("default_hab.bmp");
     bacon = SDL_LoadBMP("bacon.bmp");
@@ -112,25 +132,32 @@ int char_select()
             }
         }
         if(teclas[RIGHT]){
-            printf("%d", select.x);
             if(select.x < 314){
                 select.x += 154;
                 teclas[RIGHT] = false;
             }
         }
         if(entra){
+            for(i=0;i<9;i++)
+            {
+                if(select.x == chars[i].x-4 &&
+                   select.y == chars[i].y-4)
+                {
+                   return i;
+                }
+            }
             return 0;
         }
         entra = false;
 
         SDL_BlitSurface(bacon, NULL, game.screenSurface, NULL);
-        SDL_BlitSurface(hability, NULL, game.screenSurface, &hab);
+        SDL_BlitSurface(habilidades[hab_num], NULL, game.screenSurface, &hab);
 
         SDL_FillRect(game.screenSurface, &select, 0x5EFE18);
 
         for(i=0;i<9;i++)
         {
-            SDL_BlitSurface(default_char, NULL, game.screenSurface, &chars[i]);
+            SDL_BlitSurface(char_img[i], NULL, game.screenSurface, &chars[i]);
         }
 
         SDL_UpdateWindowSurface(game.window);

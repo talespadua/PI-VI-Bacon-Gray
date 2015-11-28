@@ -80,6 +80,7 @@ void menu()
             if(select.y == ini_ret.y - 2){
                 //jogo();
                 personagem = char_select();
+                printf("personagem %d\n", personagem);
                 level = level_select();
                 jogo();
             }
