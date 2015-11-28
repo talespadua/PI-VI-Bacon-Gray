@@ -9,10 +9,9 @@ typedef struct
     SDL_Surface* screenSurface;
 } Game;
 
-#define ALTURA 800
-#define LARGURA 600
+#define ALTURA 1000
+#define LARGURA 750
 
 Game game;
 
 #endif
-

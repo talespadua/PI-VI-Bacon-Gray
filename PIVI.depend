@@ -197,3 +197,72 @@
 	<stdlib.h>
 	<stdio.h>
 
+1448728653 source:c:\users\tales.cpadua\pi-vi-bacon-gray\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+	"menu.h"
+
+1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.h
+
+1448731621 c:\users\tales.cpadua\pi-vi-bacon-gray\game.h
+	<SDL2/SDL.h>
+
+1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\menu.h
+
+1448730049 source:c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<limits.h>
+	"game.h"
+	"queue.h"
+	"player.h"
+	"monster.h"
+
+1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\player.h
+	<stdlib.h>
+	<stdio.h>
+
+1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\monster.h
+	<stdlib.h>
+	<stdio.h>
+
+1448736797 source:c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+	"char_select.h"
+
+1448731813 source:c:\users\tales.cpadua\pi-vi-bacon-gray\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+	"char_select.h"
+
+1448736830 c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.h
+
+1448736807 source:c:\users\tales.cpadua\pi-vi-bacon-gray\level_select.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+	"char_select.h"
+

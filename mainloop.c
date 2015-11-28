@@ -367,9 +367,6 @@ int jogo(int argc, char *argv[]){
     monster_free(ml);
     player_free(pl);
 
-    //SDL_DestroyWindow( game.window );
-    //SDL_Quit();
-
     return 0;
 }
 
