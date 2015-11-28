@@ -43,7 +43,7 @@ void trataConexao(int *socket_cliente){
             if(local_contador == 0){
                 //Envia um OK para o cliente
                 printf("\nEnviando OK para o jogador 1");
-                strcpy(buffer,"ok ");
+                strcpy(buffer,"okm");
                 send(cs, buffer, strlen(buffer)+1,0);
 
                 //Muda o status do andamento
@@ -57,8 +57,8 @@ void trataConexao(int *socket_cliente){
 
                 //Muda o status do andamento e atualiza os dados do primeiro jogador
                 WaitForSingleObject(semMutex,INFINITE);
-                jg_jogador[local_contador] = buffer[0] - '0';
-                jg_ajudante[local_contador] = buffer[1] - '0';
+                jg_ajudante[local_contador] = buffer[0] - '0';
+                jg_mapa = buffer[1] - '0';
                 st_andamento = 2;
 
                 /*printf("\n> jogador 1 escolheu jogador:  %d", jg_jogador[local_contador]);
@@ -83,9 +83,7 @@ void trataConexao(int *socket_cliente){
 
                 //Envia um OK para o cliente
                 printf("\nEnviando OK para o jogador 2");
-                strcpy(buffer, "ok");
-                sprintf(c_aux, "%d", aux);
-                strcat(buffer, c_aux);
+                strcpy(buffer, "ok ");
                 send(cs, buffer, strlen(buffer)+1,0);
 
                 //Muda o status do andamento
