@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <winsock.h>
-#define ADDRESS  "127.0.0.1"
+#include "utils.h"
+
+#define ADDRESS  "0.0.0.0"
 #define PORTA    5193
 #define CONEXOES 2
 #define MAP_SIZE 25
 
 int sair = 0;
-int contador = 0;
 
-int jg_jogador[2];
-int jg_ajudante[2];
-char jg_mapa;
+int playerAssist[2];
+char gameMapNumber;
 
 int st_andamento = 0;
 
@@ -20,133 +20,136 @@ int mapa[25][25];
 
 int mySocket[2];
 
-void carrega_mapa() {
+int playerOne = 0;
+int playerTwo = 0;
+
+void loadMap() {
     FILE *mapFile;
     int square;
     int i, j;
 
     char c_mapa[] = "mapa0.xxxmap";
-    c_mapa[4] = jg_mapa;
-    //c_mapa[8] = '\0';
+    c_mapa[4] = gameMapNumber;
 
     printf("\n\nMapa: %s\n\n", c_mapa);
 
     mapFile = fopen(c_mapa, "r");
+    if (!mapFile) {
+        printf("Erro ao carregar o mapa!");
+        exit(1);
+    }
 
-    for(j = 0; j < MAP_SIZE; j++) {
-        for(i = 0; i < MAP_SIZE; i++) {
+    for (j = 0; j < MAP_SIZE; j++) {
+        for (i = 0; i < MAP_SIZE; i++) {
             fscanf(mapFile, "%d", &square);
             printf("%d ", square);
             mapa[i][j] = square;
         }
+
         printf("\n");
     }
 }
 
-void trataConexao(int local_contador){
+void trataConexao(int playerId) {
     char buffer[512];
-    int cs, n;
+    int playerSocket, n;
 
-    int local_sair = 0;
+    int endGame = 0;
+    int isCharacterSelecion = 1;
+    int isGameRunning = 0;
 
     int inicio = 0;
     int aux = 0;
 
+    // Pega o socket deste cliente.
+    playerSocket = mySocket[playerId];
 
-    WaitForSingleObject(semMutex,INFINITE);
-    printf("\nConectado usuario %d", local_contador + 1);
-    ReleaseMutex(semMutex);
+    // Só tratamos o jogador 1 e o jogador 2, por enquanto.
+    if (playerId > 1) {
+        close(playerSocket);
+        printf("\nIgnorando usuario %d, servidor está cheio.\n", playerId + 1);
+        return;
+    }
 
-    cs = mySocket[local_contador]; // guarda copia local.
-    while(!local_sair){
-        if(!inicio){
-            WaitForSingleObject(semMutex,INFINITE);
-            aux = st_andamento;
-            ReleaseMutex(semMutex);
+    printf("\nConectado usuario %d\n", playerId + 1);
 
-            //Se for o primeiro cliente a se conectar
-            if(local_contador == 0){
-                //Envia um OK para o cliente
-                printf("\nEnviando OK para o jogador 1");
-                strcpy(buffer,"okm");
-                send(cs, buffer, strlen(buffer)+1,0);
+    while (!endGame) {
+        if (isCharacterSelecion) {
+            // Se for o primeiro cliente a se conectar
+            if (playerId == 0) {
+                printf("Requisitando dados do jogador 1\n");
+                buffer[0] = ID_CHOOSE_PLAYER_1;
+                buffer[1] = '\0';
+                send(playerSocket, buffer, strlen(buffer)+1, 0);
 
-                //Muda o status do andamento
-                WaitForSingleObject(semMutex,INFINITE);
-                st_andamento = 1;
-                ReleaseMutex(semMutex);
+                // Aguarda o retorno dos dados
+                printf("Aguardando dados do jogador 1\n");
+                n = recv(playerSocket, buffer, 100, 0);
 
-                //Aguarda o retorno dos dados
-                printf("\nAguardando dados do jogador 1");
-                n = recv(cs, buffer,100,0);
-
-                //Muda o status do andamento e atualiza os dados do primeiro jogador
-                WaitForSingleObject(semMutex,INFINITE);
-                jg_ajudante[local_contador] = buffer[0] - '0';
-                jg_mapa = buffer[1];
-                st_andamento = 2;
-
-                /*printf("\n> jogador 1 escolheu jogador:  %d", jg_jogador[local_contador]);
-                printf("\n> jogador 1 escolheu ajudante: %d", jg_ajudante[local_contador]);*/
-                ReleaseMutex(semMutex);
-
-                printf("\nCarregando mapa...");
-                carrega_mapa();
-                printf("\nAguardando jogador 2...");
-            } else {
-                printf("\nAguardando jogador 1...");
-                while(aux != 2)
-                {
+                if (buffer[0] == ID_PLAYER_READY) {
+                    // Seta as variáveis de ajudante e mapa.
                     WaitForSingleObject(semMutex,INFINITE);
-                    aux = st_andamento;
+                    playerAssist[0] = buffer[1] - '0';
+                    gameMapNumber = buffer[2];
+
+                    // Player 1 está ok.
+                    playerOne = 1;
                     ReleaseMutex(semMutex);
+
+                    printf("Carregando mapa...\n");
+                    loadMap();
+
+                    // Acabou a seleção de personagens.
+                    isCharacterSelecion = 0;
+                } else {
+                    printf("Dados invalidos, envie de novo.\n");
                 }
+            } else {
+                // Aguardamos o jogador 1 ficar de boas.
+                while (!playerOne);
 
-                WaitForSingleObject(semMutex,INFINITE);
-                aux = jg_jogador[0];
-                ReleaseMutex(semMutex);
+                printf("Requisitando dados do jogador 2\n");
+                buffer[0] = ID_CHOOSE_PLAYER_2;
+                buffer[1] = '\0';
+                send(playerSocket, buffer, strlen(buffer)+1, 0);
 
-                //Envia um OK para o cliente
-                printf("\nEnviando OK para o jogador 2");
-                strcpy(buffer, "ok ");
-                send(cs, buffer, strlen(buffer)+1,0);
+                // Aguarda o retorno dos dados
+                printf("Aguardando dados do jogador 2\n");
+                n = recv(playerSocket, buffer, 100, 0);
 
-                //Muda o status do andamento
-                WaitForSingleObject(semMutex,INFINITE);
-                st_andamento = 3;
-                ReleaseMutex(semMutex);
+                if (buffer[0] == ID_PLAYER_READY) {
+                    // Seta as variáveis de ajudante e mapa.
+                    WaitForSingleObject(semMutex,INFINITE);
+                    playerAssist[1] = buffer[1] - '0';
+                    gameMapNumber = buffer[2];
 
-                //Aguarda o retorno dos dados
-                printf("\nAguardando dados do jogador 2");
-                n = recv(cs, buffer,100,0);
+                    // Player 2 está ok.
+                    playerTwo = 1;
+                    ReleaseMutex(semMutex);
 
-                broadcast();
-
-                //Muda o status do andamento e atualiza os dados do segundo jogador
-                WaitForSingleObject(semMutex,INFINITE);
-                if(buffer[0])
-                jg_jogador[local_contador] = buffer[0];
-                jg_ajudante[local_contador] = buffer[1];
-                jg_mapa = buffer[2];
-                st_andamento = 4;
-                ReleaseMutex(semMutex);
+                    // Acabou a seleção de personagens.
+                    isCharacterSelecion = 0;
+                }
             }
+        }
 
-            while(aux != 4)
-            {
-                WaitForSingleObject(semMutex,INFINITE);
-                aux = st_andamento;
-                ReleaseMutex(semMutex);
-            }
+        // Aguarda o ok dos dois jogadores.
+        while (!playerOne || !playerTwo);
+        printf("That\'s good, that\'s alright\n");
 
-            n = recv(cs, buffer,100,0);
+        // Envia os dados de início de jogo e ajudante do inimigo ao jogador.
+        buffer[0] = ID_GAME_START;
+        buffer[1] = playerAssist[1-playerId];
+        buffer[2] = '\0';
+        send(playerSocket, buffer, strlen(buffer)+1, 0);
+        isGameRunning = 1;
 
-            inicio = 1;
-            strcpy(buffer,"ini");
-            send(cs, buffer, strlen(buffer)+1,0);
+        while (isGameRunning) {
+
         }
     }
-    close(cs);
+
+    close(playerSocket);
 }
 
 void broadcast(){
@@ -155,14 +158,13 @@ void broadcast(){
     int vetor[627];
     vetor[626] = '\0';
 
-    while(aux != 4)
-    {
+    while(aux != 4) {
         WaitForSingleObject(semMutex,INFINITE);
         aux = st_andamento;
         ReleaseMutex(semMutex);
     }
 
-    while(fim){
+    while(fim) {
         //vetor[0] = abacaxi_voador_azul_de_asas;
         k = 1;
         for (j = 0; j < 25; j++) {
@@ -177,23 +179,23 @@ void broadcast(){
     }
 }
 
-int main(void)
-{
+int main(void) {
+    int playerCounter = 0;
     int desc_socket, newsocket;
 
     HANDLE handle[2];
     DWORD id[2];
-    semMutex = CreateMutex(NULL,FALSE,NULL);
+    semMutex = CreateMutex(NULL,0,NULL);
 
     struct sockaddr_in endereco;
     struct sockaddr_in endereco_cliente;
     int size_endereco_cliente;
 
-    printf( "Iniciando WinSock API no servidor...\n" );
+    printf("Iniciando WinSock API no servidor...\n");
     WSADATA wsaData;
 
-    if (WSAStartup(MAKEWORD(1, 1), &wsaData)!= 0){
-        printf("Servidor: WINSOCK.DLL nao encontrado \n" );
+    if (WSAStartup(MAKEWORD(1, 1), &wsaData)!= 0) {
+        printf("Servidor: WINSOCK.DLL nao encontrado \n");
         exit( 1 );
     }
 
@@ -205,7 +207,7 @@ int main(void)
     endereco.sin_port        = htons(PORTA); // converte num da porta
     endereco.sin_addr.s_addr = inet_addr(ADDRESS);
 
-    if(bind(desc_socket, (struct sockaddr *)&endereco, sizeof(endereco)) < 0){
+    if (bind(desc_socket, (struct sockaddr *) &endereco, sizeof(endereco)) < 0) {
         perror("Servidor: erro no bind");
         exit(1);
 	}
@@ -216,18 +218,17 @@ int main(void)
         exit(1);
     }
 
-    while (!sair)
-    {
+    while (!sair) {
         size_endereco_cliente = sizeof(struct sockaddr_in);
         newsocket = accept(desc_socket, (struct sockaddr *) &endereco_cliente, &size_endereco_cliente);
-        if(newsocket < 0){
+        if (newsocket < 0) {
 	        perror("[Servidor] erro no accept");
 	        exit(1);
 	    }
 
-        mySocket[contador] = newsocket;
-	    CreateThread(NULL, 0, (void*)trataConexao, contador, 0, &id[contador]);
-	    contador++;
+        mySocket[playerCounter] = newsocket;
+	    CreateThread(NULL, 0, (void*) trataConexao, playerCounter, 0, &id[playerCounter]);
+	    playerCounter++;
     }
 
     close(desc_socket);
