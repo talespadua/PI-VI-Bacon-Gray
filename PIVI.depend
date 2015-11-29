@@ -243,3 +243,49 @@
 	"game.h"
 	"mainloop.h"
 
+1448815179 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\main.c
+	<SDL2/SDL.h>
+	<stdio.h>
+	<stdbool.h>
+	"mainloop.h"
+	"game.h"
+	"menu.h"
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\mainloop.h
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\game.h
+	<SDL2/SDL.h>
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\menu.h
+
+1448815179 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\mainloop.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<limits.h>
+	"game.h"
+	"queue.h"
+	"player.h"
+	"monster.h"
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\player.h
+	<stdlib.h>
+	<stdio.h>
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\monster.h
+	<stdlib.h>
+	<stdio.h>
+
+1448815179 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"mainloop.h"
+
