@@ -14,6 +14,7 @@ int char_select()
     bool teclas[] = {false, false, false, false};
 
     int pos_x = 10, pos_y = 10, hab_num = 0;
+    int cur_char = 0;
 
     SDL_Rect select = {6, 6, 158 , 233};
     SDL_Rect hab = {550, 50, 400, 624};
@@ -113,45 +114,36 @@ int char_select()
         }
 
         if(teclas[UP]){
-            if(select.y > 6){
-                select.y -= 229;
-                teclas[UP] = false;
-            }
+            if(cur_char > 2)
+                cur_char -= 3;
+            teclas[UP] = false;
         }
         if(teclas[DOWN]){
-            if(select.y < 464){
-                select.y += 229;
-                teclas[DOWN] = false;
-            }
+            if(cur_char < 6)
+                cur_char += 3;
+            teclas[DOWN] = false;
         }
 
         if(teclas[LEFT]){
-            if(select.x > 6){
-                select.x -= 154;
-                teclas[LEFT] = false;
-            }
+            if(cur_char >0)
+                cur_char--;
+            teclas[LEFT] = false;
         }
         if(teclas[RIGHT]){
-            if(select.x < 314){
-                select.x += 154;
-                teclas[RIGHT] = false;
-            }
+            if(cur_char < 8)
+                cur_char ++;
+            teclas[RIGHT] = false;
         }
         if(entra){
-            for(i=0;i<9;i++)
-            {
-                if(select.x == chars[i].x-4 &&
-                   select.y == chars[i].y-4)
-                {
-                   return i;
-                }
-            }
-            return 0;
+            return cur_char;
         }
         entra = false;
 
+        select.x = chars[cur_char].x - 4;
+        select.y = chars[cur_char].y - 4;
+
         SDL_BlitSurface(bacon, NULL, game.screenSurface, NULL);
-        SDL_BlitSurface(habilidades[hab_num], NULL, game.screenSurface, &hab);
+        SDL_BlitSurface(habilidades[cur_char], NULL, game.screenSurface, &hab);
 
         SDL_FillRect(game.screenSurface, &select, 0x5EFE18);
 

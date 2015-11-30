@@ -197,7 +197,7 @@
 	<stdlib.h>
 	<stdio.h>
 
-1448728653 source:c:\users\tales.cpadua\pi-vi-bacon-gray\main.c
+1448915624 source:c:\users\tales.cpadua\pi-vi-bacon-gray\main.c
 	<SDL2/SDL.h>
 	<stdio.h>
 	<stdbool.h>
@@ -205,14 +205,14 @@
 	"game.h"
 	"menu.h"
 
-1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.h
+1448915624 c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.h
 
-1448731621 c:\users\tales.cpadua\pi-vi-bacon-gray\game.h
+1448915640 c:\users\tales.cpadua\pi-vi-bacon-gray\game.h
 	<SDL2/SDL.h>
 
-1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\menu.h
+1448915624 c:\users\tales.cpadua\pi-vi-bacon-gray\menu.h
 
-1448730049 source:c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.c
+1448925218 source:c:\users\tales.cpadua\pi-vi-bacon-gray\mainloop.c
 	<SDL2/SDL.h>
 	<stdbool.h>
 	<stdio.h>
@@ -222,19 +222,19 @@
 	"player.h"
 	"monster.h"
 
-1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\queue.h
+1448915624 c:\users\tales.cpadua\pi-vi-bacon-gray\queue.h
 	<stdlib.h>
 	<stdio.h>
 
-1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\player.h
+1448915624 c:\users\tales.cpadua\pi-vi-bacon-gray\player.h
 	<stdlib.h>
 	<stdio.h>
 
-1448728653 c:\users\tales.cpadua\pi-vi-bacon-gray\monster.h
+1448915624 c:\users\tales.cpadua\pi-vi-bacon-gray\monster.h
 	<stdlib.h>
 	<stdio.h>
 
-1448736797 source:c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.c
+1448919336 source:c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
@@ -244,7 +244,7 @@
 	"mainloop.h"
 	"char_select.h"
 
-1448739110 source:c:\users\tales.cpadua\pi-vi-bacon-gray\menu.c
+1448923547 source:c:\users\tales.cpadua\pi-vi-bacon-gray\menu.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
@@ -254,9 +254,9 @@
 	"mainloop.h"
 	"char_select.h"
 
-1448736830 c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.h
+1448915639 c:\users\tales.cpadua\pi-vi-bacon-gray\char_select.h
 
-1448736807 source:c:\users\tales.cpadua\pi-vi-bacon-gray\level_select.c
+1448921436 source:c:\users\tales.cpadua\pi-vi-bacon-gray\level_select.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_image.h>
 	<SDL2/SDL_ttf.h>
@@ -265,4 +265,6 @@
 	"game.h"
 	"mainloop.h"
 	"char_select.h"
+
+1448915624 source:c:\users\tales.cpadua\pi-vi-bacon-gray\game.c
 

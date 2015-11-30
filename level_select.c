@@ -14,6 +14,7 @@ int level_select()
     bool teclas[] = {false, false, false, false};
 
     int pos_x = 10, pos_y = 10;
+    int cur_select = 0;
 
     SDL_Rect select = {6, 6, 235 , 233};
     SDL_Rect hab = {550, 50, 400, 624};
@@ -93,36 +94,33 @@ int level_select()
         }
 
         if(teclas[UP]){
-            if(select.y > 6){
-                select.y -= 229;
-                teclas[UP] = false;
-            }
+            if(cur_select > 1)
+                cur_select -= 2;
+            teclas[UP] = false;
         }
         if(teclas[DOWN]){
-            if(select.y < 255){
-                select.y += 229;
-                teclas[DOWN] = false;
-            }
-            printf("%d", select.y);
+            if(cur_select < 4)
+                cur_select +=2;
+            teclas[DOWN] = false;
         }
 
         if(teclas[LEFT]){
-            if(select.x > 6){
-                select.x -= 231;
-                teclas[LEFT] = false;
-            }
+            if(cur_select > 0)
+                cur_select--;
+            teclas[LEFT] = false;
         }
         if(teclas[RIGHT]){
-            printf("%d", select.x);
-            if(select.x < 237){
-                select.x += 231;
-                teclas[RIGHT] = false;
-            }
+            if(cur_select < 5)
+                cur_select ++;
+            teclas[RIGHT] = false;
         }
         if(entra){
-            return 0;
+            return cur_select;
         }
         entra = false;
+
+        select.x = levels[cur_select].x - 4;
+        select.y = levels[cur_select].y - 4;
 
         SDL_BlitSurface(bacon, NULL, game.screenSurface, NULL);
         SDL_BlitSurface(hability, NULL, game.screenSurface, &hab);

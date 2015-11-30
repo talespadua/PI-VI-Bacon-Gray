@@ -18,13 +18,37 @@ void smallestNeighbor(int mapa[][MAP_SIZE], int *x, int *y);
 void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]);
 void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]);
 
+typedef struct Level{
+    SDL_Surface *parede, *chao;
+    int map_id;
+} Level;
+
 void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenSurface,
                   SDL_Surface *parede, SDL_Surface *personagem, SDL_Surface *chao,
-                  int tamanho, int *x_jogador, int *y_jogador) {
+                  int tamanho, int *x_jogador, int *y_jogador, int level) {
 
     FILE *mapFile;
     int square;
     int i, j;
+
+    if(level == 0){
+        mapFile = fopen("maps/mapa_0.txt", "r");
+    }
+    else if(level == 1){
+        mapFile = fopen("maps/mapa_1.txt", "r");
+    }
+    else if(level == 2){
+        mapFile = fopen("maps/mapa_2.txt", "r");
+    }
+    else if(level == 3){
+        mapFile = fopen("maps/mapa_3.txt", "r");
+    }
+    else if(level == 4){
+        mapFile = fopen("maps/mapa_4.txt", "r");
+    }
+    else{
+        mapFile = fopen("maps/mapa_5.txt", "r");
+    }
 
     mapFile = fopen("mapa.txt", "r");
     SDL_Rect r = {0,0,tamanho,tamanho};
@@ -60,8 +84,39 @@ void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenS
     SDL_UpdateWindowSurface(window);
 }
 
-int jogo(int argc, char *argv[]){
+int jogo(int person, int level){
     int jogo_ativo = 1;
+
+    Level levels[6];
+
+    levels[0].chao = SDL_LoadBMP("sprites/forest_floor.bmp");
+    levels[0].parede = SDL_LoadBMP("sprites/forest_wall.bmp");
+    levels[0].map_id = 0;
+
+    levels[1].chao = SDL_LoadBMP("sprites/forest_floor.bmp");
+    levels[1].parede = SDL_LoadBMP("sprites/forest_wall.bmp");
+    levels[1].map_id = 1;
+
+    levels[2].chao = SDL_LoadBMP("sprites/house_floor.bmp");
+    levels[2].parede = SDL_LoadBMP("sprites/house_wall.bmp");
+    levels[2].map_id = 0;
+
+    levels[3].chao = SDL_LoadBMP("sprites/house_floor.bmp");
+    levels[3].parede = SDL_LoadBMP("sprites/house_wall.bmp");
+    levels[3].map_id = 0;
+
+    levels[4].chao = SDL_LoadBMP("sprites/industrial_floor.bmp");
+    levels[4].parede = SDL_LoadBMP("sprites/industrial_wall.bmp");
+    levels[4].map_id = 0;
+
+    levels[5].chao = SDL_LoadBMP("sprites/industrial_floor.bmp");
+    levels[5].parede = SDL_LoadBMP("sprites/industrial_wall.bmp");
+    levels[5].map_id = 0;
+
+    //parede = SDL_LoadBMP("parede.bmp");
+    //personagem = SDL_LoadBMP("personagem.bmp");
+    //monstro = SDL_LoadBMP("monstro.bmp");
+    //chao = SDL_LoadBMP("chao.bmp");
 
     int t1, t2, t3, delay, timeCounter, framesPassed;
     timeCounter = 0;
@@ -112,7 +167,7 @@ int jogo(int argc, char *argv[]){
     monstro = SDL_LoadBMP("monstro.bmp");
     chao = SDL_LoadBMP("chao.bmp");
 
-    carrega_mapa(mapa, game.window, game.screenSurface, parede, personagem, chao, tamanho, &p->x, &p->y);
+    carrega_mapa(mapa, game.window, game.screenSurface, levels[level].parede, personagem, levels[level].chao, tamanho, &p->x, &p->y, level);
 
     while (jogo_ativo) {
         while (SDL_PollEvent(&eventos)) {
@@ -198,7 +253,7 @@ int jogo(int argc, char *argv[]){
         if (!morto && playerWalk) {
             if (teclas[DOWN]) {
                 if(mapa[p->x][p->y+1] != -1 && p->y <= MAP_SIZE - 2) {
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                    SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
                     mapa[p->x][p->y] = 0;
@@ -209,7 +264,7 @@ int jogo(int argc, char *argv[]){
                 }
             } else if(teclas[UP]) {
                 if(mapa[p->x][p->y-1] != -1 && p->y > 0) {
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                    SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
                     mapa[p->x][p->y] = 0;
@@ -220,7 +275,7 @@ int jogo(int argc, char *argv[]){
                 }
             } else if(teclas[RIGHT]) {
                 if(mapa[p->x+1][p->y] != -1 && p->x <= MAP_SIZE - 2) {
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                    SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
                     mapa[p->x][p->y] = 0;
@@ -231,7 +286,7 @@ int jogo(int argc, char *argv[]){
                 }
             } else if(teclas[LEFT]) {
                 if(mapa[p->x-1][p->y] != -1 && p->x > 0) {
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                    SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
                     // Limpa a posição no mapa para facilitar o cálculo do pathfinding
                     mapa[p->x][p->y] = 0;
@@ -274,7 +329,7 @@ int jogo(int argc, char *argv[]){
                 mapa[m->x][m->y] = 0;
                 r.x = m->x*tamanho;
                 r.y = m->y*tamanho;
-                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
                 free(m);
             }
@@ -306,7 +361,7 @@ int jogo(int argc, char *argv[]){
 
             r.x = m->x*tamanho;
             r.y = m->y*tamanho;
-            SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+            SDL_BlitSurface(levels[level].chao, &rcSprite, game.screenSurface, &r);
 
             if (!queue_isEmpty(way)) {
                 Node *n = queue_deq(way);

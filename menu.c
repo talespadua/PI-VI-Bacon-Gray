@@ -80,9 +80,10 @@ void menu()
             if(select.y == ini_ret.y - 2){
                 //jogo();
                 personagem = char_select();
-                printf("personagem %d\n", personagem);
+                //printf("personagem %d\n", personagem);
                 level = level_select();
-                jogo();
+                //printf("level %d\n", level);
+                jogo(personagem, level);
             }
             if(select.y == sair_ret.y - 2){
                 exit(0);
