@@ -13,19 +13,18 @@
 #define PORTA    5193
 #define CONEXOES 2
 #define MAP_SIZE 25
-#define PLAYER_WEIGHT -2
-
 
 void loadMap();
 void gameLoop();
 void trataConexao(int playerId);
 
-void printMapa(int mapa[][MAP_SIZE]);
+void printMap(int mapa[][MAP_SIZE]);
 void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]);
 void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]);
 void smallestNeighbor(int mapa[][MAP_SIZE], int *x, int *y);
 void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]);
-void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]);
+void calculateBestMove(Queue *a, Queue *b, int mapa[][MAP_SIZE]);
+bool calculateDistance(Monster *m, Player *p1, Player *p2);
 
 int sair = 0;
 int st_andamento = 0;
@@ -265,7 +264,7 @@ void gameLoop() {
         WaitForSingleObject(semMutex, INFINITE);
         printf("Parse player walk\n");
         while (p) {
-            int playerWeight = mapa[p->x][p->y];
+            int playerWeight = (p->id == 0) ? PLAYER_ONE : PLAYER_TWO;
             playerWalk = (framesPassed % p->speed) == 0;
 
             if (playerWalk) {
@@ -320,21 +319,6 @@ void gameLoop() {
                 }
 
                 mapa[p->x][p->y] = playerWeight;
-
-                /*
-                if (special && !monster_isEmpty(ml)) {
-                    special = false;
-
-                    Monster *m = ml->first;
-                    monster_remove(ml, m);
-
-                    mapa[m->x][m->y] = 0;
-                    r.x = m->x*tamanho;
-                    r.y = m->y*tamanho;
-                    SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
-
-                    free(m);
-                } //*/
             }
 
             p = p-> next;
@@ -345,6 +329,9 @@ void gameLoop() {
             monsterWalk = (framesPassed % m->speed) == 0;
 
             if (monsterWalk) {
+                int px, py;
+                bool playerOneIsCloser;
+
                 Player *p1 = pl->first;
                 Player *p2 = p1->next;
 
@@ -355,9 +342,13 @@ void gameLoop() {
                 queue_clear(astar);
                 queue_clear(way);
                 queue_enq(astar, m->x, m->y, 0);
-                queue_enq(astar, p1->x, p1->y, 0);
 
-                calculate(astar, way, mapa);
+                playerOneIsCloser = calculateDistance(m, p1, p2);
+                px = playerOneIsCloser ? p1->x : p2->x;
+                py = playerOneIsCloser ? p1->y : p2->y;
+                queue_enq(astar, px, py, 0);
+
+                calculateBestMove(astar, way, mapa);
 
                 if (!queue_isEmpty(way)) {
                     Node *n = queue_deq(way);
@@ -372,22 +363,28 @@ void gameLoop() {
 
                 if (m->x == p1->x && m->y == p1->y) {
                     // TODO fim de jogo p1
-                    buffer[0] = GAME_DEFEAT;
-                    buffer[1] = '\0';
+                    buffer[0] = ID_GAME_END;
+                    buffer[1] = GAME_DEFEAT;
+                    buffer[2] = '\0';
                     send(mySocket[0], buffer, strlen(buffer)+1, 0);
 
-                    buffer[0] = GAME_VICTORY;
-                    buffer[1] = '\0';
+                    buffer[1] = GAME_VICTORY;
                     send(mySocket[1], buffer, strlen(buffer)+1, 0);
+
+                    gameRunning = false;
+                    ReleaseMutex(semMutex);
                 } else if (m->x == p2->x && m->y == p2->y) {
                     // TODO fim de jogo p2
-                    buffer[0] = GAME_DEFEAT;
-                    buffer[1] = '\0';
+                    buffer[0] = ID_GAME_END;
+                    buffer[1] = GAME_DEFEAT;
+                    buffer[2] = '\0';
                     send(mySocket[1], buffer, strlen(buffer)+1, 0);
 
-                    buffer[0] = GAME_VICTORY;
-                    buffer[1] = '\0';
+                    buffer[1] = GAME_VICTORY;
                     send(mySocket[0], buffer, strlen(buffer)+1, 0);
+
+                    gameRunning = false;
+                    ReleaseMutex(semMutex);
                 }
             }
 
@@ -411,7 +408,7 @@ void gameLoop() {
 
             if ((timeCounter % 15) == 0) {
                 monsterBaseSpeed -= 5;
-                monster_add(ml, 9, 9, 0, monsterBaseSpeed, 0);
+                monster_add(ml, 12, 12, 0, monsterBaseSpeed, 0);
             }
 
             timeCounter++;
@@ -450,10 +447,10 @@ void loadMap() {
         // printf("\n");
     }
 
-    printMapa(mapa);
+    printMap(mapa);
 }
 
-void printMapa(int mapa[][MAP_SIZE]) {
+void printMap(int mapa[][MAP_SIZE]) {
     int i, j;
     for (i = 0; i < MAP_SIZE; i++) {
         for (j = 0; j < MAP_SIZE; j++) {
@@ -469,11 +466,23 @@ void printMapa(int mapa[][MAP_SIZE]) {
 }
 
 void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]) {
-    int i, j;
+    int i, j, aux;
 
-    for (i = 0; i < MAP_SIZE; i++)
-        for (j = 0; j < MAP_SIZE; j++)
-            b[i][j] = (a[i][j] == FLOOR || a[i][j] == PLAYER_ONE || a[i][j] == PLAYER_TWO) ? 0 : -1;
+    for (i = 0; i < MAP_SIZE; i++) {
+        for (j = 0; j < MAP_SIZE; j++) {
+            aux = a[i][j];
+
+            if (aux == PLAYER_ONE || aux == PLAYER_TWO) {
+                aux = -2;
+            } else if (aux == FLOOR) {
+                aux = 0;
+            } else {
+                aux = -1;
+            }
+
+            b[i][j] = aux;
+        }
+    }
 }
 
 void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]) {
@@ -615,19 +624,19 @@ void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]) {
     // }
 }
 
-void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]) {
+void calculateBestMove(Queue *a, Queue *b, int mapa[][MAP_SIZE]) {
     Node *monster = queue_deq(a);
     Node *player = queue_peek(a);
 
     int mapaAux[MAP_SIZE][MAP_SIZE];
     copyMatrix(mapa, mapaAux);
 
-    // printMapa(mapaAux);
+    // printMap(mapaAux);
 
     while (!queue_isEmpty(a))
         enqueueNeighbors(a, queue_deq(a), mapaAux);
 
-    // printMapa(mapaAux);
+    // printMap(mapaAux);
 
     // return;
     // printf("player: ");
@@ -638,3 +647,13 @@ void calculate(Queue *a, Queue *b, int mapa[][MAP_SIZE]) {
     // queue_print(b);
 }
 
+bool calculateDistance(Monster *m, Player *p1, Player *p2) {
+    int mx = m->x, my = m->y;
+    int p1x = p1->x, p1y = p1->y;
+    int p2x = p2->x, p2y = p2->y;
+
+    long dist1 = ((mx - p1x) * (mx - p1x)) + ((my - p1y) * (my - p1y));
+    long dist2 = ((mx - p2x) * (mx - p2x)) + ((my - p2y) * (my - p2y));
+
+    return (dist1 <= dist2);
+}

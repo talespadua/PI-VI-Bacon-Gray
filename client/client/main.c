@@ -16,7 +16,6 @@ void config();
 void inicio(int socket_cliente);
 void printMapa(int mapa[MAP_SIZE][MAP_SIZE]);
 void receiveMap(int socket_cliente);
-void userInput(int socket_cliente);
 
 int num_jogador;
 char address[16];
@@ -107,61 +106,6 @@ void inicio(int socket_cliente) {
     } //*/
 }
 
-void userInput(int socket_cliente) {
-    bool gameRunning = true;
-    SDL_Event eventos;
-
-    char buffer[10];
-    buffer[9] = '\0';
-
-    while (gameRunning) {
-        char pressedKey;
-        bool keyChanged = false;
-
-        while (SDL_PollEvent(&eventos)) {
-            if (eventos.type == SDL_KEYDOWN) {
-                if (eventos.key.keysym.sym == SDLK_DOWN) {
-                    pressedKey = DOWN;
-                    keyChanged = true;
-                }
-
-                if (eventos.key.keysym.sym == SDLK_UP) {
-                    pressedKey = UP;
-                    keyChanged = true;
-                }
-
-                if (eventos.key.keysym.sym == SDLK_LEFT) {
-                    pressedKey = LEFT;
-                    keyChanged = true;
-                }
-
-                if (eventos.key.keysym.sym == SDLK_RIGHT) {
-                    pressedKey = RIGHT;
-                    keyChanged = true;
-                }
-
-                if (eventos.key.keysym.sym == SDLK_SPACE) {
-                    // Especial
-                }
-
-                if (keyChanged) {
-                    buffer[0] = ID_PLAYER_DIRECTION;
-                    buffer[1] = pressedKey;
-                    buffer[2] = '0';
-                    buffer[3] = '\0';
-
-                    send(socket_cliente, buffer, strlen(buffer)+1, 0);
-                }
-            }
-
-            if (eventos.type == SDL_QUIT){
-                // Fim de jogo.
-                // jogo_ativo = 0;
-            }
-        }
-    }
-}
-
 void receiveMap(int socket_cliente) {
     int t1, t2, delay;
     int n, i = 0, j = 0, k = 1;
@@ -174,17 +118,24 @@ void receiveMap(int socket_cliente) {
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Event eventos;
-    SDL_Surface *obstacle, *player1, *player2, *monster, *floor;
+    SDL_Surface *obstacle, *player1, *player2, *monster, *floor, *win, *lose, *portrait;
 
     obstacle = SDL_LoadBMP("sprites/forest_wall.bmp");
-    player1 = SDL_LoadBMP("sprites/industrial_wall.bmp");
-    player2 = SDL_LoadBMP("sprites/house_wall.bmp");
+    player1 = SDL_LoadBMP("sprites/player1.bmp");
+    player2 = SDL_LoadBMP("sprites/player2.bmp");
     monster = SDL_LoadBMP("sprites/monstro.bmp");
     floor = SDL_LoadBMP("sprites/forest_floor.bmp");
+    portrait = SDL_LoadBMP(isPlayerOne ? "sprites/player1_portrait.bmp" : "sprites/player2_portrait.bmp");
+    win = SDL_LoadBMP(isPlayerOne ? "sprites/player1_win.bmp" : "sprites/player2_win.bmp");
+    lose = SDL_LoadBMP("sprites/loser.bmp");
 
     SDL_Rect r = {0, 0, SPRITE_SIZE, SPRITE_SIZE};
     SDL_Rect rcSprite = {0, 0, SPRITE_SIZE, SPRITE_SIZE};
+    SDL_Rect rcEndgame = {0, 0, 1000, 750};
+    SDL_Rect rcPortrait = {760, 10, 230, 230};
     SDL_FillRect(game.screenSurface, NULL, 0x00ff00);
+
+    SDL_BlitSurface(portrait, NULL, game.screenSurface, &rcPortrait);
 
     while (gameRunning) {
         char pressedKey;
@@ -284,6 +235,17 @@ void receiveMap(int socket_cliente) {
             SDL_UpdateWindowSurface(game.window);
             // printf("return\n");
             // return;
+        } else if (buffer[0] == ID_GAME_END) {
+            if (buffer[1] == GAME_VICTORY) {
+                SDL_BlitSurface(win, NULL, game.screenSurface, &rcEndgame);
+                // win
+            } else {
+                SDL_BlitSurface(lose, NULL, game.screenSurface, &rcEndgame);
+                // loose.
+            }
+
+            SDL_UpdateWindowSurface(game.window);
+            gameRunning = false;
         }
 
         printf("Delay\n");
