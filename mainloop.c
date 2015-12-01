@@ -50,7 +50,7 @@ void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenS
         mapFile = fopen("maps/mapa_5.txt", "r");
     }
 
-    mapFile = fopen("mapa.txt", "r");
+    //mapFile = fopen("mapa.txt", "r");
     SDL_Rect r = {0,0,tamanho,tamanho};
     SDL_Rect rcSprite = {0,0,tamanho,tamanho};
     SDL_FillRect(screenSurface, NULL, 0xffffff);
@@ -74,6 +74,7 @@ void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenS
             } else if(mapa[i][j] == PLAYER_WEIGHT){
                 (*x_jogador) = i;
                 (*y_jogador) = j;
+                SDL_BlitSurface(chao, &r, screenSurface, &rcSprite);
                 SDL_BlitSurface(personagem, &r, screenSurface, &rcSprite);
             } else {
                 SDL_BlitSurface(chao, &r, screenSurface, &rcSprite);
@@ -86,6 +87,8 @@ void carrega_mapa(int mapa[][MAP_SIZE], SDL_Window* window, SDL_Surface *screenS
 
 int jogo(int person, int level){
     int jogo_ativo = 1;
+
+    int colorkey;
 
     Level levels[6];
 
@@ -163,7 +166,11 @@ int jogo(int person, int level){
 
     //screenSurface = SDL_GetWindowSurface(game.window);
     parede = SDL_LoadBMP("parede.bmp");
-    personagem = SDL_LoadBMP("personagem.bmp");
+    personagem = SDL_LoadBMP("sprites/girl.bmp");
+
+    //colorkey = SDL_MapRGB(game.screenSurface->format, 255, 0, 255);
+    SDL_SetColorKey(personagem, SDL_TRUE, SDL_MapRGB(game.screenSurface->format, 255, 0, 255));
+
     monstro = SDL_LoadBMP("monstro.bmp");
     chao = SDL_LoadBMP("chao.bmp");
 
@@ -313,7 +320,7 @@ int jogo(int person, int level){
                 printf("abaixo: %i\n", mapa[y_jogador][x_jogador + 1]);
                 printf("esquerda: %i\n", mapa[y_jogador - 1][x_jogador]);
                 */
-                //SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
+                SDL_BlitSurface(chao, &rcSprite, game.screenSurface, &r);
                 SDL_BlitSurface(personagem, &rcSprite, game.screenSurface, &r);
 
                 // Limpa a posição no mapa para facilitar o cálculo do pathfinding
