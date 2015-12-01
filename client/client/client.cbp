@@ -15,7 +15,7 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add option="-lws2_32" />
+					<Add option="-lws2_32 -lmingw32 -lSDL2main -lSDL2" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -34,9 +34,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="game.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="utils.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

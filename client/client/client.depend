@@ -11,3 +11,17 @@
 	<stdio.h>
 	<winsock.h>
 
+1448976822 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\main.c
+	<SDL2/SDL.h>
+	<stdbool.h>
+	<stdio.h>
+	<winsock.h>
+	<ctype.h>
+	"utils.h"
+	"game.h"
+
+1448973971 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\utils.h
+
+1448936749 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\game.h
+	<SDL2/SDL.h>
+
