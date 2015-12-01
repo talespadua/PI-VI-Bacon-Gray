@@ -47,6 +47,7 @@
 		</Unit>
 		<Unit filename="menu.h" />
 		<Unit filename="queue.h" />
+		<Unit filename="utils.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
