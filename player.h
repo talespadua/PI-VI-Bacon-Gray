@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #define PLAYER_NAME_SIZE 11
-#define PLAYER_BASE_SPEED 220
+#define PLAYER_BASE_SPEED 500
 
 typedef struct Player Player;
 typedef struct PlayerList PlayerList;
@@ -31,7 +31,7 @@ struct PlayerList {
 PlayerList* player_create(); // Cria uma nova lista.
 void player_clear(PlayerList *pl); // Limpa todos os jogadores da lista.
 void player_free(PlayerList *pl); // Libera os recursos da lista.
-void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]); // Adiciona um novo jogador na lista.
+void player_add(PlayerList *pl, int id, int x, int y, int speed, int condition, int character, char name[PLAYER_NAME_SIZE]); // Adiciona um novo jogador na lista.
 void player_remove(PlayerList *pl, Player *p); // Remove um jogador específico da lista.
 Player* player_peek(PlayerList *pl); // Retorna o primeiro jogador da lista sem removê-lo.
 int player_isEmpty(PlayerList *pl); // Verifica se a lista está vazia.
@@ -65,12 +65,12 @@ void player_free(PlayerList *pl) {
     free(pl);
 }
 
-void player_add(PlayerList *pl, int id, int x, int y, int condition, int character, char name[PLAYER_NAME_SIZE]) {
+void player_add(PlayerList *pl, int id, int x, int y, int speed, int condition, int character, char name[PLAYER_NAME_SIZE]) {
     Player *p = (Player*) malloc(sizeof(Player));
     p->id = id;
     p->x = x;
     p->y = y;
-    p->speed = PLAYER_BASE_SPEED;
+    p->speed = speed;
     p->condition = condition;
     p->character = character;
     p->special = 0;

@@ -18,6 +18,7 @@ void loadMap();
 void gameLoop();
 void trataConexao(int playerId);
 
+void config();
 void printMap(int mapa[][MAP_SIZE]);
 void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]);
 void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]);
@@ -40,6 +41,9 @@ bool playerTwoSpecial = false;
 bool playerOne = 0;
 bool playerTwo = 0;
 
+int monsterBaseSpeed = 750;
+int playerBaseSpeed = 500;
+
 int mySocket[2];
 HANDLE semMutex;
 
@@ -55,6 +59,8 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in endereco;
     struct sockaddr_in endereco_cliente;
     int size_endereco_cliente;
+
+    config();
 
     printf("Iniciando WinSock API no servidor...\n");
     WSADATA wsaData;
@@ -246,12 +252,11 @@ void gameLoop() {
     framesPassed = 0;
     t1 = SDL_GetTicks();
 
-    int monsterBaseSpeed = MONSTER_BASE_SPEED;
     MonsterList *ml = monster_create();
 
     PlayerList *pl = player_create();
-    player_add(pl, 0, 0, 0, playerAssist[0], 0, "Sasha");
-    player_add(pl, 1, 24, 24, playerAssist[1], 0, "Jynx");
+    player_add(pl, 0, 0, 0, playerBaseSpeed, 0, playerAssist[0], "Sasha");
+    player_add(pl, 1, 24, 24, playerBaseSpeed, 0, playerAssist[1], "Jynx");
 
     mapa[0][0] = PLAYER_ONE;
     mapa[24][24] = PLAYER_TWO;
@@ -419,6 +424,22 @@ void gameLoop() {
     queue_free(way);
     monster_free(ml);
     player_free(pl);
+}
+
+void config() {
+    FILE *configFile;
+    int data;
+
+    configFile = fopen("config.txt", "r");
+    if (!configFile) {
+        printf("Erro ao abrir arquivo de configuracao!\n");
+        exit(1);
+    }
+
+    fscanf(configFile, "%d", &playerBaseSpeed);
+    fscanf(configFile, "%d", &monsterBaseSpeed);
+
+    fclose(configFile);
 }
 
 void loadMap() {
