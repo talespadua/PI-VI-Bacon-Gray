@@ -15,7 +15,7 @@
 					<Add option="-g" />
 				</Compiler>
 				<Linker>
-					<Add option="-lws2_32" />
+					<Add option="-lws2_32 -lSDL2main -lSDL2" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -37,6 +37,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="monster.h" />
+		<Unit filename="player.h" />
+		<Unit filename="queue.h" />
+		<Unit filename="utils.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

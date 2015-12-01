@@ -15,10 +15,28 @@
 	<stdio.h>
 	<winsock.h>
 
-1448822947 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\main.c
+1448930918 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\main.c
+	<SDL2/SDL.h>
 	<stdio.h>
+	<stdbool.h>
 	<winsock.h>
+	<limits.h>
 	"utils.h"
+	"queue.h"
+	"player.h"
+	"monster.h"
 
-1448820725 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\utils.h
+1448930856 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\utils.h
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\queue.h
+	<stdlib.h>
+	<stdio.h>
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\player.h
+	<stdlib.h>
+	<stdio.h>
+
+1448815179 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\server\server\monster.h
+	<stdlib.h>
+	<stdio.h>
 
