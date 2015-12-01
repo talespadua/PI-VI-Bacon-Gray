@@ -103,8 +103,8 @@ int main(int argc, char *argv[]) {
 }
 
 void trataConexao(int playerId) {
-    char buffer[512];
-    int playerSocket, n;
+    char buffer[1024];
+    int playerSocket, n, i, j, k;
 
     bool endGame = false;
     bool isCharacterSelecion = true;
@@ -170,7 +170,6 @@ void trataConexao(int playerId) {
                     // Seta as variáveis de ajudante e mapa.
                     WaitForSingleObject(semMutex,INFINITE);
                     playerAssist[1] = buffer[1] - '0';
-                    gameMapNumber = buffer[2];
 
                     // Player 2 está ok.
                     playerTwo = true;
@@ -188,8 +187,9 @@ void trataConexao(int playerId) {
         // Envia os dados de início de jogo e ajudante do inimigo ao jogador.
         buffer[0] = ID_GAME_START;
         buffer[1] = playerAssist[1-playerId];
-        buffer[2] = '\0';
-        send(playerSocket, buffer, strlen(buffer)+1, 0);
+        buffer[2] = gameMapNumber;
+        buffer[3] = '\0';
+        send(playerSocket, buffer, 4, 0);
         isGameRunning = true;
 
         // Thread do player 1 inicia a Thread de jogo
@@ -198,7 +198,30 @@ void trataConexao(int playerId) {
         }
 
         while (isGameRunning) {
+            n = recv(playerSocket, buffer, 100, 0);
+            printf("Received: %d %s\n", playerId, buffer);
 
+            if (buffer[0] == ID_PLAYER_DIRECTION) {
+                WaitForSingleObject(semMutex, INFINITE);
+                playerDirection[playerId] = buffer[1];
+                ReleaseMutex(semMutex);
+            } else if (buffer[0] == ID_REQUEST_MAP) {
+                WaitForSingleObject(semMutex, INFINITE);
+                k = 0;
+                buffer[k++] = ID_MAP;
+
+                for (i = 0; i < MAP_SIZE; i++) {
+                    for (j = 0; j < MAP_SIZE; j++) {
+                        buffer[k++] = mapa[i][j];
+                    }
+                }
+
+                buffer[k] = '\0';
+
+                send(playerSocket, buffer, strlen(buffer)+1, 0);
+                // printf("Sent: %d %s\n", strlen(buffer)+1, buffer);
+                ReleaseMutex(semMutex);
+            }
         }
     }
 
@@ -214,13 +237,13 @@ void gameLoop() {
     bool playerWalk = true;
     bool monsterWalk = false;
 
-    int i, j, k;
-    char buffer[627];
-    buffer[626] = '\0';
+    int intendedPos;
+    char buffer[1024];
+    buffer[1023] = '\0';
 
-    int t1, t2, t3, delay, timeCounter, framesPassed;
+    int t1, t2, delay, timeCounter, framesPassed;
     timeCounter = 0;
-    delay = 25; //- 1000/25 ~= 40 FPS
+    delay = 34; //- 1000/34 ~= 30 FPS
     framesPassed = 0;
     t1 = SDL_GetTicks();
 
@@ -239,37 +262,57 @@ void gameLoop() {
     while (gameRunning) {
         Player *p = pl->first;
 
+        WaitForSingleObject(semMutex, INFINITE);
+        printf("Parse player walk\n");
         while (p) {
             int playerWeight = mapa[p->x][p->y];
             playerWalk = (framesPassed % p->speed) == 0;
 
             if (playerWalk) {
+                printf("Player can walk\n");
+
                 switch (playerDirection[p->id]) {
                 case DOWN:
-                    if (mapa[p->x][p->y+1] >= 0 && p->y <= MAP_SIZE - 2) {
-                        mapa[p->x][p->y] = 0;
-                        p->y++;
+                    if (p->y < (MAP_SIZE-1)) {
+                        intendedPos = mapa[p->x][p->y+1];
+
+                        if (intendedPos == FLOOR || intendedPos == SPECIAL_ITEM) {
+                            mapa[p->x][p->y] = FLOOR;
+                            p->y++;
+                        }
                     }
                     break;
 
                 case UP:
-                    if (mapa[p->x][p->y-1] >= 0 && p->y > 0) {
-                        mapa[p->x][p->y] = 0;
-                        p->y--;
+                    if (p->y > 0) {
+                        intendedPos = mapa[p->x][p->y-1];
+
+                        if (intendedPos == FLOOR || intendedPos == SPECIAL_ITEM) {
+                            mapa[p->x][p->y] = FLOOR;
+                            p->y--;
+                        }
                     }
                     break;
 
                 case RIGHT:
-                    if (mapa[p->x+1][p->y] >= 0 && p->x <= MAP_SIZE - 2) {
-                        mapa[p->x][p->y] = 0;
-                        p->x++;
+                    if (p->x < (MAP_SIZE-1)) {
+                        intendedPos = mapa[p->x+1][p->y];
+
+                        if (intendedPos == FLOOR || intendedPos == SPECIAL_ITEM) {
+                            mapa[p->x][p->y] = FLOOR;
+                            p->x++;
+                        }
                     }
                     break;
 
                 case LEFT:
-                    if (mapa[p->x-1][p->y] >= 0 && p->x > 0) {
-                        mapa[p->x][p->y] = 0;
-                        p->x--;
+                    if (p->x > 0) {
+                        intendedPos = mapa[p->x-1][p->y];
+
+                        if (intendedPos == FLOOR || intendedPos == SPECIAL_ITEM) {
+                            mapa[p->x][p->y] = FLOOR;
+                            p->x--;
+                        }
                     }
                     break;
 
@@ -305,7 +348,7 @@ void gameLoop() {
                 Player *p1 = pl->first;
                 Player *p2 = p1->next;
 
-                mapa[m->x][m->y] = 0;
+                mapa[m->x][m->y] = FLOOR;
 
                 // todo get euclidian distance.
 
@@ -350,22 +393,7 @@ void gameLoop() {
 
             m = m->next;
         } // Fim while (m)
-
-        // Envia mapa para o P1 e P1
-        k = 0;
-        buffer[k] = ID_MAP;
-
-        for (j = 0; j < MAP_SIZE; j++) {
-            for (i = 0; i < MAP_SIZE; i++) {
-                buffer[k++] = mapa[i][j];
-            }
-        }
-
-        buffer[k] = '\0';
-
-        send(mySocket[0], buffer, 627, 0);
-        send(mySocket[1], buffer, 627, 0);
-        printf("Sent: %d %s\n", strlen(buffer), buffer);
+        ReleaseMutex(semMutex);
 
         // Conta mais um frame passado.
         framesPassed = (framesPassed++) % (1000);
@@ -388,7 +416,7 @@ void gameLoop() {
 
             timeCounter++;
         }
-    }
+    } // fim while(gameRunning)
 
     queue_free(astar);
     queue_free(way);
@@ -415,12 +443,14 @@ void loadMap() {
     for (j = 0; j < MAP_SIZE; j++) {
         for (i = 0; i < MAP_SIZE; i++) {
             fscanf(mapFile, "%d", &square);
-            printf("%d ", square);
-            mapa[i][j] = square;
-        }
+            // printf("%d ", square);
 
-        printf("\n");
+            mapa[i][j] = (square == -1) ? OBSTACLE : FLOOR;
+        }
+        // printf("\n");
     }
+
+    printMapa(mapa);
 }
 
 void printMapa(int mapa[][MAP_SIZE]) {
@@ -443,7 +473,7 @@ void copyMatrix(int a[][MAP_SIZE], int b[][MAP_SIZE]) {
 
     for (i = 0; i < MAP_SIZE; i++)
         for (j = 0; j < MAP_SIZE; j++)
-            b[i][j] = a[i][j];
+            b[i][j] = (a[i][j] == FLOOR || a[i][j] == PLAYER_ONE || a[i][j] == PLAYER_TWO) ? 0 : -1;
 }
 
 void enqueueNeighbors(Queue *q, Node *n, int mapa[][MAP_SIZE]) {
@@ -563,6 +593,11 @@ void smallestNeighbor(int mapa[][MAP_SIZE], int *rx, int *ry) {
 }
 
 void enqueueBestWay(Queue *q, Node *s, Node *t, int mapa[][MAP_SIZE]) {
+    /*
+        Inicialmente a intenção era dar toda a lista de possibilidades de movimentação
+        mas agora nós damos apenas 1 nó de movimentação por vez, por questões de otimização.
+    */
+
     int xs = s->x, ys = s->y;
     // int xt = t->x, yt = t->y;
     int x = xs, y = ys;

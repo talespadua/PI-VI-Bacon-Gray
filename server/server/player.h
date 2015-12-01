@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #define PLAYER_NAME_SIZE 11
-#define PLAYER_BASE_SPEED 220
+#define PLAYER_BASE_SPEED 500
 
 typedef struct Player Player;
 typedef struct PlayerList PlayerList;

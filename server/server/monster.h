@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MONSTER_BASE_SPEED 500
+#define MONSTER_BASE_SPEED 1000
 
 typedef struct Monster Monster;
 typedef struct MonsterList MonsterList;
