@@ -248,7 +248,7 @@ void gameLoop() {
 
     int t1, t2, delay, timeCounter, framesPassed;
     timeCounter = 0;
-    delay = 34; //- 1000/34 ~= 30 FPS
+    delay = 34; //- 10000/340 ~= 30 FPS
     framesPassed = 0;
     t1 = SDL_GetTicks();
 
@@ -398,7 +398,7 @@ void gameLoop() {
         ReleaseMutex(semMutex);
 
         // Conta mais um frame passado.
-        framesPassed = (framesPassed++) % (1000);
+        framesPassed = (framesPassed++) % (10000);
 
         // Calcula os milissegundos passados.
         t2 = SDL_GetTicks() - t1;
