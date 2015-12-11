@@ -11,17 +11,53 @@
 	<stdio.h>
 	<winsock.h>
 
-1448979852 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\main.c
+1449861907 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\main.c
 	<SDL2/SDL.h>
 	<stdbool.h>
 	<stdio.h>
 	<winsock.h>
 	<ctype.h>
+	"menu.h"
 	"utils.h"
 	"game.h"
 
-1448973971 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\utils.h
+1449863621 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\utils.h
 
 1448936749 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\game.h
 	<SDL2/SDL.h>
+
+1449862382 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\char_select.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"char_select.h"
+
+1448907130 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\char_select.h
+
+1449861508 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\level_select.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"game.h"
+	"char_select.h"
+
+1448907130 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\menu.h
+
+1449862290 source:c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\menu.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_image.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdbool.h>
+	"utils.h"
+	"game.h"
+	"char_select.h"
+	"level_select.h"
+
+1448907130 c:\users\tgl dogg\documents\github\pi-vi-bacon-gray\client\client\level_select.h
 

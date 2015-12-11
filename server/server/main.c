@@ -41,6 +41,7 @@ bool playerTwoSpecial = false;
 bool playerOne = 0;
 bool playerTwo = 0;
 
+int monsterBaseSpeedUnchanged = 750;
 int monsterBaseSpeed = 750;
 int playerBaseSpeed = 500;
 
@@ -136,27 +137,30 @@ void trataConexao(int playerId) {
                 buffer[1] = '\0';
                 send(playerSocket, buffer, strlen(buffer)+1, 0);
 
-                // Aguarda o retorno dos dados
-                printf("Aguardando dados do jogador 1\n");
-                n = recv(playerSocket, buffer, 100, 0);
+                while (true) {
+                    // Aguarda o retorno dos dados
+                    printf("Aguardando dados do jogador 1\n");
+                    n = recv(playerSocket, buffer, 100, 0);
 
-                if (buffer[0] == ID_PLAYER_READY) {
-                    // Seta as variáveis de ajudante e mapa.
-                    WaitForSingleObject(semMutex,INFINITE);
-                    playerAssist[0] = buffer[1] - '0';
-                    gameMapNumber = buffer[2];
+                    if (buffer[0] == ID_PLAYER_READY) {
+                        // Seta as variáveis de ajudante e mapa.
+                        WaitForSingleObject(semMutex,INFINITE);
+                        playerAssist[0] = buffer[1] - '0';
+                        gameMapNumber = buffer[2];
 
-                    // Player 1 está ok.
-                    playerOne = true;
-                    ReleaseMutex(semMutex);
+                        // Player 1 está ok.
+                        playerOne = true;
+                        ReleaseMutex(semMutex);
 
-                    printf("Carregando mapa...\n");
-                    loadMap();
+                        printf("Carregando mapa...\n");
+                        loadMap();
 
-                    // Acabou a seleção de personagens.
-                    isCharacterSelecion = false;
-                } else {
-                    printf("Dados invalidos, envie de novo.\n");
+                        // Acabou a seleção de personagens.
+                        isCharacterSelecion = false;
+                        break;
+                    } else {
+                        printf("Dados invalidos, envie de novo.\n");
+                    }
                 }
             } else {
                 // Aguardamos o jogador 1 ficar de boas.
@@ -167,21 +171,26 @@ void trataConexao(int playerId) {
                 buffer[1] = '\0';
                 send(playerSocket, buffer, strlen(buffer)+1, 0);
 
-                // Aguarda o retorno dos dados
-                printf("Aguardando dados do jogador 2\n");
-                n = recv(playerSocket, buffer, 100, 0);
+                while (true) {
+                    // Aguarda o retorno dos dados
+                    printf("Aguardando dados do jogador 2\n");
+                    n = recv(playerSocket, buffer, 100, 0);
 
-                if (buffer[0] == ID_PLAYER_READY) {
-                    // Seta as variáveis de ajudante e mapa.
-                    WaitForSingleObject(semMutex,INFINITE);
-                    playerAssist[1] = buffer[1] - '0';
+                    if (buffer[0] == ID_PLAYER_READY) {
+                        // Seta as variáveis de ajudante e mapa.
+                        WaitForSingleObject(semMutex,INFINITE);
+                        playerAssist[1] = buffer[1] - '0';
 
-                    // Player 2 está ok.
-                    playerTwo = true;
-                    ReleaseMutex(semMutex);
+                        // Player 2 está ok.
+                        playerTwo = true;
+                        ReleaseMutex(semMutex);
 
-                    // Acabou a seleção de personagens.
-                    isCharacterSelecion = false;
+                        // Acabou a seleção de personagens.
+                        isCharacterSelecion = false;
+                        break;
+                    } else {
+                        printf("Dados invalidos, envie de novo.\n");
+                    }
                 }
             }
         }
@@ -204,7 +213,7 @@ void trataConexao(int playerId) {
 
         while (isGameRunning) {
             n = recv(playerSocket, buffer, 100, 0);
-            printf("Received: %d %s\n", playerId, buffer);
+            // printf("Received: %d %s\n", playerId, buffer);
 
             if (buffer[0] == ID_PLAYER_DIRECTION) {
                 WaitForSingleObject(semMutex, INFINITE);
@@ -226,6 +235,12 @@ void trataConexao(int playerId) {
                 send(playerSocket, buffer, strlen(buffer)+1, 0);
                 // printf("Sent: %d %s\n", strlen(buffer)+1, buffer);
                 ReleaseMutex(semMutex);
+            } else if (buffer[0] == ID_GAME_REPLAY) {
+                playerOne = false;
+                playerTwo = false;
+
+                isCharacterSelecion = true;
+                isGameRunning = false;
             }
         }
     }
@@ -248,9 +263,13 @@ void gameLoop() {
 
     int t1, t2, delay, timeCounter, framesPassed;
     timeCounter = 0;
-    delay = 34; //- 10000/340 ~= 30 FPS
+    delay = 16; //- 1000/16 ~= 60 FPS
     framesPassed = 0;
     t1 = SDL_GetTicks();
+
+    monsterBaseSpeed = monsterBaseSpeedUnchanged;
+    playerDirection[0] = 0;
+    playerDirection[1] = 0;
 
     MonsterList *ml = monster_create();
 
@@ -267,13 +286,13 @@ void gameLoop() {
         Player *p = pl->first;
 
         WaitForSingleObject(semMutex, INFINITE);
-        printf("Parse player walk\n");
+        // printf("Parse player walk\n");
         while (p) {
             int playerWeight = (p->id == 0) ? PLAYER_ONE : PLAYER_TWO;
             playerWalk = (framesPassed % p->speed) == 0;
 
             if (playerWalk) {
-                printf("Player can walk\n");
+                // printf("Player can walk\n");
 
                 switch (playerDirection[p->id]) {
                 case DOWN:
@@ -342,8 +361,6 @@ void gameLoop() {
 
                 mapa[m->x][m->y] = FLOOR;
 
-                // todo get euclidian distance.
-
                 queue_clear(astar);
                 queue_clear(way);
                 queue_enq(astar, m->x, m->y, 0);
@@ -400,11 +417,12 @@ void gameLoop() {
         // Conta mais um frame passado.
         framesPassed = (framesPassed++) % (10000);
 
+        printf("frames %d\n", framesPassed);
         // Calcula os milissegundos passados.
         t2 = SDL_GetTicks() - t1;
 
         // Espera o resto do tempo pra completar 1 frame
-        if (t2 < delay){
+        if (t2 < delay) {
             SDL_Delay(delay - t2);
         }
 
@@ -424,11 +442,11 @@ void gameLoop() {
     queue_free(way);
     monster_free(ml);
     player_free(pl);
+    printf("Play again?\n");
 }
 
 void config() {
     FILE *configFile;
-    int data;
 
     configFile = fopen("config.txt", "r");
     if (!configFile) {
@@ -438,6 +456,9 @@ void config() {
 
     fscanf(configFile, "%d", &playerBaseSpeed);
     fscanf(configFile, "%d", &monsterBaseSpeed);
+    monsterBaseSpeedUnchanged = monsterBaseSpeed;
+
+    printf("Player speed: %d, Monster speed: %d\n", playerBaseSpeed, monsterBaseSpeed);
 
     fclose(configFile);
 }

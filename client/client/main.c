@@ -4,6 +4,7 @@
 #include <winsock.h>
 #include <ctype.h>
 
+#include "menu.h"
 #include "utils.h"
 #include "game.h"
 
@@ -13,9 +14,9 @@
 
 int initSDL();
 void config();
-void inicio(int socket_cliente);
+bool inicio(int socket_cliente);
 void printMapa(int mapa[MAP_SIZE][MAP_SIZE]);
-void receiveMap(int socket_cliente);
+bool receiveMap(int socket_cliente, int choosenMap);
 
 int num_jogador;
 char address[16];
@@ -26,9 +27,12 @@ int opponentAssit;
 int main(int argc, char *argv[]) {
     int desc_socket;
     struct sockaddr_in endereco;
+    bool playAgain = true;
 
     initSDL();
     config();
+
+    menu();
 
     printf( "Iniciando WinSock API...\n" );
     WSADATA wsaData;
@@ -52,16 +56,27 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    inicio(desc_socket);
+    do {
+        playAgain = inicio(desc_socket);
+    } while (playAgain);
     // jogo(desc_socket);
 
     system("pause");
     exit(0);
 }
 
-void inicio(int socket_cliente) {
+bool inicio(int socket_cliente) {
+    int choosenMap = 0;
     char buffer[1024];
     buffer[1023] = '\0';
+
+    SDL_Surface *waiting, *loading;
+    waiting = SDL_LoadBMP("imgs/waiting.bmp");
+    loading = SDL_LoadBMP("imgs/loading.bmp");
+
+    // SDL_BlitSurface(loading, NULL, game.screenSurface, NULL);
+    SDL_BlitSurface(waiting, NULL, game.screenSurface, NULL);
+    SDL_UpdateWindowSurface(game.window);
 
     printf("Aguardando instruções do servidor...\n");
     recv(socket_cliente, buffer, 100, 0);
@@ -81,32 +96,30 @@ void inicio(int socket_cliente) {
     //*/
 
     buffer[3] = '\0';
-    buffer[2] = '1';
+    buffer[2] = isPlayerOne? level_select() : '1';
     buffer[1] = '1';
     buffer[0] = ID_PLAYER_READY;
 
     send(socket_cliente, buffer, strlen(buffer)+1, 0);
 
+    if (isPlayerOne) {
+        SDL_BlitSurface(waiting, NULL, game.screenSurface, NULL);
+        SDL_UpdateWindowSurface(game.window);
+    }
+
     while (true) {
         recv(socket_cliente, buffer, 100, 0);
         if (buffer[0] == ID_GAME_START) {
+            choosenMap = buffer[2] - '0';
             // perform other operations (?)
             break;
         }
     }
 
-    receiveMap(socket_cliente);
-    // CreateThread(NULL, 0, (void*) receiveMap, socket_cliente, 0, NULL);
-    // while(true);
-    // receiveMap(socket_cliente);
-    /*
-    while (strcmp(buffer, "end")) {
-        n = recv(socket_cliente, buffer, 627, 0);
-        printf("Recebidos: %d\n", n);
-    } //*/
+    return receiveMap(socket_cliente, choosenMap);
 }
 
-void receiveMap(int socket_cliente) {
+bool receiveMap(int socket_cliente, int choosenMap) {
     int t1, t2, delay;
     int n, i = 0, j = 0, k = 1;
     delay = 100; //- 1000/25 ~= 40 FPS
@@ -120,14 +133,23 @@ void receiveMap(int socket_cliente) {
     SDL_Event eventos;
     SDL_Surface *obstacle, *player1, *player2, *monster, *floor, *win, *lose, *portrait;
 
-    obstacle = SDL_LoadBMP("sprites/forest_wall.bmp");
-    player1 = SDL_LoadBMP("sprites/player1.bmp");
-    player2 = SDL_LoadBMP("sprites/player2.bmp");
+    if (choosenMap < 2) {
+        floor = SDL_LoadBMP("sprites/forest_floor.bmp");
+        obstacle = SDL_LoadBMP("sprites/forest_wall.bmp");
+    } else if (choosenMap > 3) {
+        floor = SDL_LoadBMP("sprites/industrial_floor.bmp");
+        obstacle = SDL_LoadBMP("sprites/industrial_wall.bmp");
+    } else {
+        floor = SDL_LoadBMP("sprites/house_floor.bmp");
+        obstacle = SDL_LoadBMP("sprites/house_wall.bmp");
+    }
+
+    player1 = SDL_LoadBMP("imgs/player1.bmp");
+    player2 = SDL_LoadBMP("imgs/player2.bmp");
     monster = SDL_LoadBMP("sprites/monstro.bmp");
-    floor = SDL_LoadBMP("sprites/forest_floor.bmp");
-    portrait = SDL_LoadBMP(isPlayerOne ? "sprites/player1_portrait.bmp" : "sprites/player2_portrait.bmp");
-    win = SDL_LoadBMP(isPlayerOne ? "sprites/player1_win.bmp" : "sprites/player2_win.bmp");
-    lose = SDL_LoadBMP("sprites/loser.bmp");
+    portrait = SDL_LoadBMP(isPlayerOne ? "imgs/player1_portrait.bmp" : "imgs/player2_portrait.bmp");
+    win = SDL_LoadBMP(isPlayerOne ? "imgs/player1_win.bmp" : "imgs/player2_win.bmp");
+    lose = SDL_LoadBMP("imgs/loser.bmp");
 
     SDL_Rect r = {0, 0, SPRITE_SIZE, SPRITE_SIZE};
     SDL_Rect rcSprite = {0, 0, SPRITE_SIZE, SPRITE_SIZE};
@@ -258,6 +280,30 @@ void receiveMap(int socket_cliente) {
         }
         // SDL_UpdateWindowSurface(game.window);
         // SDL_Delay(1000);
+    }
+
+    while (true) {
+        while (SDL_PollEvent(&eventos)) {
+            if (eventos.type == SDL_KEYDOWN) {
+                if (eventos.key.keysym.sym == SDLK_RETURN) {
+                    // Limpa entrada de dados do usuário
+                    while (SDL_PollEvent(&eventos));
+
+                    buffer[0] = ID_GAME_REPLAY;
+                    buffer[1] = '\0';
+
+                    printf("Play again\n");
+                    send(socket_cliente, buffer, strlen(buffer)+1, 0);
+                    return true;
+                }
+            }
+
+            if (eventos.type == SDL_QUIT){
+                // Fim de jogo.
+                // jogo_ativo = 0;
+                exit(0);
+            }
+        }
     }
 }
 
